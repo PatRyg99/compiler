@@ -1,8 +1,9 @@
+# pylint: skip-file
 from sly import Parser
 from src.lexer import CompilerLexer
 
 from src.variables import VariableManager
-from src.blocks import Write, Assignment, operation_mapper
+from src.blocks import Write, Assignment, operation_mapper, Constant
 from src.program import Program
 
 class CompilerParser(Parser):
@@ -58,18 +59,18 @@ class CompilerParser(Parser):
         pass
     
     # Expression
-    @_('value',
-       'value PLUS value',
+    @_('value')
+    def expression(self, p):
+        return p.value
+
+    @_('value PLUS value',
        'value MINUS value',
        'value MULTIPLY value',
        'value DIVIDE value',
        'value MODULO value'
     )
     def expression(self, p):
-        if len(p) == 1:
-            return p.value
-        else:
-            return operation_mapper(p[1])(p.value0, p.value1, p.lineno)
+        return operation_mapper(p[1])(p.value0, p.value1, p.lineno)
 
     # Condition
     @_('value EQUALS value',
@@ -85,7 +86,7 @@ class CompilerParser(Parser):
     # Value
     @_('NUMBER')
     def value(self, p):
-        return p.NUMBER
+        return Constant(p.NUMBER)
     
     @_('identifier')
     def value(self, p):

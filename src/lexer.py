@@ -1,5 +1,6 @@
+# pylint: skip-file
 from sly import Lexer
-from src.errors import syntax_error
+from src.errors import Error
 
 class CompilerLexer(Lexer):
 
@@ -101,4 +102,4 @@ class CompilerLexer(Lexer):
     """ERROR HANDLING"""
     # Error handling on other characters
     def error(self, t):
-        syntax_error(self.lineno)
+        Error.Syntax.throw(self.lineno)

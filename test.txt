@@ -1,8 +1,8 @@
 DECLARE
 a, b(1:10), c
 BEGIN
-    a := 2 + 3;
-    b(2) := 2 + 0;
+    a := 10;
+    b(2) := a;
     c := a * b(2);
 
     WRITE a;

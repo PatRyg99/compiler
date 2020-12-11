@@ -1,13 +1,27 @@
-from src.instructions import *
+from src.instructions import RESET, SHL, INC
 
 class Constant:
     def __init__(self, value: int):
         self.value = value
 
     def generate_code(self, reg: str = "a"):
+
+        # Reset operational register
         code = [RESET(reg)]
 
-        for _ in range(self.value):
+        # If value 0
+        if self.value == 0:
+            return code
+
+        # Otherwise change to binary
+        else:
+            bin_value = bin(self.value)[2:]
+
             code.append(INC(reg))
+
+            for bit in bin_value[1:]:
+                code.append(SHL(reg))
+                if bit == "1":
+                    code.append(INC(reg))
 
         return code

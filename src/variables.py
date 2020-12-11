@@ -1,12 +1,6 @@
-from src.instructions import *
-from src.errors import (
-    redeclaration_variable_error,
-    variable_not_declared_error,
-    variable_not_array_error, 
-    array_invalid_range_error,
-    array_invalid_index_error,
-    array_not_indexed_error
-)
+from src.instructions import LOAD
+from src.blocks import Constant
+from src.errors import Error
 
 class VariableManager:
     """VariableManager of arrays and variables"""
@@ -18,9 +12,9 @@ class VariableManager:
     def _check_redeclaration(name: str, lineno: int):
         """Check if variable hasn't been declared yet"""
         declared = list(VariableManager.variables.keys()) + list(VariableManager.arrays.keys())
-        
+
         if name in declared:
-            redeclaration_variable_error(name, lineno)
+            Error.VariableRedeclaration.throw(lineno)
 
     @staticmethod
     def _compute_length(name: str, range: tuple, lineno: int):
@@ -28,10 +22,10 @@ class VariableManager:
         length = range[1] - range[0] + 1
 
         if length <= 0:
-            array_invalid_range_error(name, lineno)
+            Error.ArrayInvalidRange(lineno)
 
         return length
-        
+
     @staticmethod
     def declare_variable(name: str, lineno: int):
         """Variable declaration with name check"""
@@ -57,9 +51,9 @@ class VariableManager:
 
         except KeyError:
             if name not in VariableManager.arrays.keys():
-                variable_not_declared_error(name, lineno)
+                Error.VariableNotDeclared.throw(lineno)
             else:
-                array_not_indexed_error(name, lineno)
+                Error.ArrayNotIndexed.throw(lineno)
 
     @staticmethod
     def get_array_element(name: str, lineno: int, idx: int):
@@ -69,14 +63,19 @@ class VariableManager:
 
         except KeyError:
             if name not in VariableManager.variables.keys():
-                variable_not_declared_error(name, lineno)
+                Error.VariableNotDeclared.throw(lineno)
             else:
-                variable_not_array_error(name, lineno)
+                Error.IndexedVariableNotArray(lineno)
 
-  
 class Variable:
     def __init__(self, memory_block: int):
         self.memory_block = memory_block
+
+    def generate_code(self, reg: str = "a"):
+        code = Constant(self.memory_block).generate_code(reg=reg)
+        code.append(LOAD(reg, reg))
+
+        return code
 
 class Array:
     def __init__(self, memory_block: int, range: tuple):
@@ -84,9 +83,5 @@ class Array:
         self.range = range
 
     def get(self, idx: int, lineno: int, name: str):
-        if self.range[0] <= idx <= self.range[1]:
-            mem_block = self.memory_block + (idx - self.range[0])
-            return Variable(mem_block)
-
-        else:
-            array_invalid_index_error(lineno, name)
+        mem_block = self.memory_block + (idx - self.range[0])
+        return Variable(mem_block)

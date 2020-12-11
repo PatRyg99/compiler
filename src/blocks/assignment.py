@@ -1,6 +1,5 @@
-from src.instructions import *
+from src.instructions import STORE
 from src.blocks.constant import Constant
-
 
 class Assignment:
     def __init__(self, var, expression, lineno):

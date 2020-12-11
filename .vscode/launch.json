@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Calculator",
+            "name": "Compiler",
             "type": "python",
             "request": "launch",
             "program": "main.py",

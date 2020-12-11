@@ -1,5 +1,5 @@
-from src.instructions import *
-from src.errors import division_by_zero_error
+from src.instructions import LOAD, ADD, SUB, RESET, JZERO, JUMP, DEC
+from src.errors import Error
 from src.blocks.constant import Constant
 
 def operation_mapper(operation: str):
@@ -18,22 +18,28 @@ class BinaryOperation:
         self.y = y
         self.lineno = lineno
 
+    def eval(self):
+        raise NotImplementedError()
+
+    def eval_mem(self, reg_1: str, reg_2: str, reg_3: str):
+        raise NotImplementedError()
+
     def generate_code(self, reg: str = "a"):
-        
+
         # If both values are numbers than evaluate constant
-        if type(self.x) == int and type(self.y) == int:
+        if isinstance(self.x, Constant) and isinstance(self.y, Constant):
             return Constant(self.eval()).generate_code(reg=reg)
 
         # If x is number than compute it as constant
-        if type(self.x) == int:
-            x_code = Constant(self.x).generate_code(reg)
+        if isinstance(self.x, Constant):
+            x_code = self.x.generate_code(reg)
         else:
             x_code = Constant(self.x.memory_block).generate_code(reg)
             x_code.append(LOAD(reg, reg))
-        
+
         # If y is number than compute is as constant
-        if type(self.y) == int:
-            y_code = Constant(self.y).generate_code(reg="c")
+        if isinstance(self.y, Constant):
+            y_code = self.y.generate_code(reg="c")
         else:
             y_code = Constant(self.y.memory_block).generate_code(reg="c")
             y_code.append(LOAD("c", "c"))
@@ -45,7 +51,7 @@ class Plus(BinaryOperation):
 
     def eval(self):
         """Evaluate operation on constants"""
-        return self.x + self.y
+        return self.x.value + self.y.value
 
     def eval_mem(self, reg_1: str, reg_2: str, reg_3: str):
         """Evaluate operation on memory registers"""
@@ -53,14 +59,14 @@ class Plus(BinaryOperation):
 
 class Minus(BinaryOperation):
     def eval(self):
-        return min(0, self.x - self.y)
+        return min(0, self.x.value - self.y.value)
 
     def eval_mem(self, reg_1: str, reg_2: str, reg_3: str):
         return [SUB(reg_1, reg_2)]
-    
+
 class Multiply(BinaryOperation):
     def eval(self):
-        return self.x * self.y
+        return self.x.value * self.y.value
 
     def eval_mem(self, reg_1: str, reg_2: str, reg_3: str):
         code = [
@@ -74,17 +80,15 @@ class Multiply(BinaryOperation):
         ]
 
         return code
-        
 
 class Divide(BinaryOperation):
     def eval(self):
-        if self.y == 0:
-            division_by_zero_error(self.lineno)
-        return self.x // self.y
+        if self.y.value == 0:
+            return 0
+        return self.x.value // self.y.value
 
 class Modulo(BinaryOperation):
     def eval(self):
-        if self.y == 0:
-            division_by_zero_error(self.lineno)
-        return self.x % self.y
-        
+        if self.y.value == 0:
+            return 0
+        return self.x.value % self.y.value
