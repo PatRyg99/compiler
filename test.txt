@@ -1,11 +1,13 @@
 DECLARE
 a, b(1:10), c
 BEGIN
-    a := 10;
-    b(2) := a;
+    a := 10 * 2;
+    b(2) := a * 0;
+    b(1) := 0 * a;
     c := a * b(2);
 
     WRITE a;
     WRITE b(2);
+    WRITE b(1);
     WRITE c;
 END

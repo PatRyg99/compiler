@@ -3,18 +3,19 @@ from src.lexer import CompilerLexer
 from src.parser import CompilerParser
 from src.variables import VariableManager
 from src.program import Program
+from src.registers import RegisterManager
 
 def main(in_file: str, out_file: str):
 
     with open(in_file, "r") as f:
         data = f.read()
-    
+
     lexer = CompilerLexer()
     parser = CompilerParser()
 
     tokens = lexer.tokenize(data)
+    parser.parse(tokens)
 
-    res = parser.parse(tokens)
     code = Program.generate_code()
 
     with open("out.txt", "w") as f:

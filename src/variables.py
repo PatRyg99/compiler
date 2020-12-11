@@ -1,6 +1,7 @@
 from src.instructions import LOAD
 from src.blocks import Constant
 from src.errors import Error
+from src.registers import Register
 
 class VariableManager:
     """VariableManager of arrays and variables"""
@@ -71,9 +72,9 @@ class Variable:
     def __init__(self, memory_block: int):
         self.memory_block = memory_block
 
-    def generate_code(self, reg: str = "a"):
-        code = Constant(self.memory_block).generate_code(reg=reg)
-        code.append(LOAD(reg, reg))
+    def generate_code(self, reg: Register):
+        code = Constant(self.memory_block).generate_code(reg)
+        code.append(LOAD(reg.name, reg.name))
 
         return code
 

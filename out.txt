@@ -4,13 +4,35 @@ SHL a
 SHL a
 INC a
 SHL a
+SHL a
 RESET b
 STORE a b
 RESET a
 LOAD a a
+RESET c
+RESET d
+JZERO c 4
+ADD d a
+DEC c
+JUMP -3
+RESET a
+ADD a d
 RESET b
 INC b
 SHL b
+STORE a b
+RESET a
+RESET c
+LOAD c c
+RESET d
+JZERO c 4
+ADD d a
+DEC c
+JUMP -3
+RESET a
+ADD a d
+RESET b
+INC b
 STORE a b
 RESET a
 LOAD a a
@@ -38,6 +60,9 @@ PUT a
 RESET a
 INC a
 SHL a
+PUT a
+RESET a
+INC a
 PUT a
 RESET a
 INC a
