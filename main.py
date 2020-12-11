@@ -2,6 +2,7 @@ import argparse
 from src.lexer import CompilerLexer
 from src.parser import CompilerParser
 from src.variables import VariableManager
+from src.program import Program
 
 def main(in_file: str, out_file: str):
 
@@ -12,13 +13,13 @@ def main(in_file: str, out_file: str):
     parser = CompilerParser()
 
     tokens = lexer.tokenize(data)
-    res = parser.parse(tokens)
 
-    for var in VariableManager.declared:
-        if not hasattr(var, "range"):
-            print(f"[Variable] Name: {var.name}, Mem: {var.memory_block}")
-        else:
-            print(f"[Array] Name: {var.name}, Mem: {var.memory_block}, Range: {var.range}")
+    res = parser.parse(tokens)
+    code = Program.generate_code()
+
+    with open("out.txt", "w") as f:
+        code.append("HALT")
+        f.write("\n".join(code))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

@@ -1,0 +1,61 @@
+RESET a
+INC a
+INC a
+INC a
+INC a
+INC a
+RESET b
+STORE a b
+RESET a
+INC a
+INC a
+RESET b
+INC b
+INC b
+STORE a b
+RESET a
+LOAD a a
+RESET c
+INC c
+INC c
+LOAD c c
+RESET d
+JZERO c 4
+ADD d a
+DEC c
+JUMP -3
+RESET a
+ADD a d
+RESET b
+INC b
+INC b
+INC b
+INC b
+INC b
+INC b
+INC b
+INC b
+INC b
+INC b
+INC b
+STORE a b
+RESET a
+PUT a
+RESET a
+INC a
+INC a
+PUT a
+RESET a
+INC a
+INC a
+INC a
+INC a
+INC a
+INC a
+INC a
+INC a
+INC a
+INC a
+INC a
+PUT a
+HALT

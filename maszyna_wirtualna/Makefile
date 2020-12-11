@@ -16,7 +16,7 @@ maszyna-wirtualna-cln: lexer.o parser.o mw-cln.o main.o
 	$(CXX) $(FLAGS) -c $^
 
 lexer.cc: lexer.l parser.hh
-	flex -d -o $@ $<
+	flex -o $@ $<
 
 parser.cc parser.hh: parser.y
 	bison -Wall -d -o parser.cc $^

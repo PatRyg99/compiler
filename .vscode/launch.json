@@ -12,7 +12,7 @@
             "justMyCode": false,
             "args": [
                 "test.txt",
-                "test.txt"
+                "out.txt"
             ]
         }
     ]

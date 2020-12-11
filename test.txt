@@ -1,15 +1,11 @@
 DECLARE
-n, p, a(1:10)
+a, b(1:10), c
 BEGIN
-    READ n;
-    REPEAT
-        p := n/2;
-        p := 2*p;
-        IF n > p THEN
-            WRITE 1;
-        ELSE
-            WRITE 0;
-        ENDIF
-        n := n/2;
-    UNTIL n=0;
+    a := 2 + 3;
+    b(2) := 2 + 0;
+    c := a * b(2);
+
+    WRITE a;
+    WRITE b(2);
+    WRITE c;
 END

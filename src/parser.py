@@ -2,13 +2,11 @@ from sly import Parser
 from src.lexer import CompilerLexer
 
 from src.variables import VariableManager
+from src.blocks import Write, Assignment, operation_mapper
+from src.program import Program
 
 class CompilerParser(Parser):
     tokens = CompilerLexer.tokens
-    precedence = (
-        ('left', "PLUS", "MINUS"),
-        ('left', "MULTIPLY", "DIVIDE", "MODULO")
-    )
 
     # Program
     @_('BEGIN commands END')
@@ -40,19 +38,25 @@ class CompilerParser(Parser):
         pass
     
     # Command
-    @_('identifier ASSIGN expression SEMICOLON',
-       'IF condition THEN commands ELSE commands ENDIF',
+    @_('identifier ASSIGN expression SEMICOLON')
+    def command(self, p):
+        Program.blocks.append(Assignment(p.identifier, p.expression, p.lineno))
+
+    @_('WRITE value SEMICOLON')
+    def command(self, p):
+        Program.blocks.append(Write(p.value, p.lineno))
+
+    @_('IF condition THEN commands ELSE commands ENDIF',
        'IF condition THEN commands ENDIF',
        'WHILE condition DO commands ENDWHILE',
        'REPEAT commands UNTIL condition SEMICOLON',
        'FOR PIDENTIFIER FROM value TO value DO commands ENDFOR',
        'FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR',
        'READ PIDENTIFIER SEMICOLON',
-       'WRITE PIDENTIFIER SEMICOLON'
     )
     def command(self, p):
         pass
-
+    
     # Expression
     @_('value',
        'value PLUS value',
@@ -62,7 +66,10 @@ class CompilerParser(Parser):
        'value MODULO value'
     )
     def expression(self, p):
-        pass
+        if len(p) == 1:
+            return p.value
+        else:
+            return operation_mapper(p[1])(p.value0, p.value1, p.lineno)
 
     # Condition
     @_('value EQUALS value',
@@ -76,16 +83,23 @@ class CompilerParser(Parser):
         pass
 
     # Value
-    @_('NUMBER',
-       'identifier'
-    )
+    @_('NUMBER')
     def value(self, p):
-        pass
+        return p.NUMBER
+    
+    @_('identifier')
+    def value(self, p):
+        return p[0]
 
     # Identifier
-    @_('PIDENTIFIER',
-       'PIDENTIFIER RPARENT PIDENTIFIER LPARENT',
-       'PIDENTIFIER LPARENT NUMBER RPARENT'
-    )
+    @_('PIDENTIFIER')
     def identifier(self, p):
-        pass
+        return VariableManager.get_var(p.PIDENTIFIER, p.lineno)
+
+    @_('PIDENTIFIER LPARENT PIDENTIFIER RPARENT')
+    def identifier(self, p):
+        return None
+
+    @_('PIDENTIFIER LPARENT NUMBER RPARENT')
+    def identifier(self, p):
+        return VariableManager.get_array_element(p.PIDENTIFIER, p.lineno, p.NUMBER)
