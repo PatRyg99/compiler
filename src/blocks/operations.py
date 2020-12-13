@@ -1,4 +1,4 @@
-from src.instructions import LOAD, ADD, SUB, RESET, JZERO, JUMP, DEC
+from src.instructions import LOAD, ADD, SUB, RESET, JZERO, JUMP, DEC, INC, SHL, JODD, SHR
 from src.errors import Error
 from src.blocks.constant import Constant
 from src.registers import Register, RegisterManager
@@ -9,7 +9,7 @@ def operation_mapper(operation: str):
         "-": Minus,
         "*": Multiply,
         "/": Divide,
-        "%": Modulo
+        "%": lambda x, y, lineno: Divide(x, y, lineno, modulo=True)
     }
     return mapper[operation]
 
@@ -20,9 +20,11 @@ class BinaryOperation:
         self.lineno = lineno
 
     def eval_num(self):
+        """Evaluate operation on constants"""
         raise NotImplementedError()
 
     def eval_mem(self, regx, regy):
+        """Evaluate operation on memory registers"""
         raise NotImplementedError()
 
     def generate_code(self, regx: Register):
@@ -63,11 +65,9 @@ class BinaryOperation:
 class Plus(BinaryOperation):
 
     def eval_num(self):
-        """Evaluate operation on constants"""
         return self.x.value + self.y.value
 
     def eval_mem(self, regx: Register, regy: Register):
-        """Evaluate operation on memory registers"""
         return [ADD(regx.name, regy.name)]
 
 class Minus(BinaryOperation):
@@ -86,12 +86,17 @@ class Multiply(BinaryOperation):
 
         code = [
             RESET(regz.name),
-            JZERO(regy.name, 4),
-            ADD(regz.name, regx.name),
-            DEC(regy.name),
-            JUMP(-3),
+
+            JZERO(regx.name, 7),
+            JODD(regx.name, 2),
+            JUMP(2),
+            ADD(regz.name, regy.name),
+            SHR(regx.name),
+            SHL(regy.name),
+            JUMP(-6),
+
             RESET(regx.name),
-            ADD(regx.name, regz.name),
+            ADD(regx.name, regz.name)
         ]
 
         regz.unlock()
@@ -99,13 +104,72 @@ class Multiply(BinaryOperation):
         return code
 
 class Divide(BinaryOperation):
-    def eval_num(self):
-        if self.y.value == 0:
-            return 0
-        return self.x.value // self.y.value
 
-class Modulo(BinaryOperation):
+    def __init__(self, x: int, y: int, lineno: int, modulo: bool = False):
+        super().__init__(x, y, lineno)
+        self.modulo = modulo
+
     def eval_num(self):
         if self.y.value == 0:
             return 0
-        return self.x.value % self.y.value
+
+        if self.modulo:
+            return self.x.value % self.y.value
+        else:
+            return self.x.value // self.y.value
+
+    def eval_mem(self, regx: Register, regy: Register):
+        regz = RegisterManager.get_free_register()
+        regw = RegisterManager.get_free_register()
+        regv = RegisterManager.get_free_register()
+
+        code = [
+            RESET(regz.name),
+
+            # Check if divisor is not 0
+            JZERO(regy.name, 22),
+
+            RESET(regv.name),
+
+            # Aligning left most bits
+            RESET(regw.name),
+            ADD(regw.name, regx.name),
+            SUB(regw.name, regy.name),
+            JZERO(regw.name, 4),
+            INC(regv.name),
+            SHL(regy.name),
+            JUMP(-5),
+
+            # Division loop
+            SHR(regy.name),
+            DEC(regv.name),
+            RESET(regw.name),
+            ADD(regw.name, regy.name),
+            SUB(regw.name, regx.name),
+            JZERO(regw.name, 3),
+
+            # If divisor is larger than divident
+            SHL(regz.name),
+            JUMP(4),
+
+            # Else if divident is larger or equal
+            SUB(regx.name, regy.name),
+            SHL(regz.name),
+            INC(regz.name),
+
+            # End loop when divident is back to its original form
+            JZERO(regv.name, 3),
+            JUMP(-12),
+
+            # If divident is zero
+            RESET(regx.name)
+        ]
+
+        if not self.modulo:
+            code += [RESET(regx.name), ADD(regx.name, regz.name)]
+
+        regz.unlock()
+        regw.unlock()
+        regv.unlock()
+
+        return code
