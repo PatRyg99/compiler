@@ -1,4 +1,4 @@
-from src.instructions import STORE, PUT
+from src.instructions import STORE, PUT, RESET
 from src.blocks import Constant
 from src.registers import Register, RegisterManager
 
@@ -10,21 +10,23 @@ class Write:
     def generate_code(self):
 
         # Get free register
-        reg = RegisterManager.get_free_register()
+        regx = RegisterManager.get_free_register()
+        regy = RegisterManager.get_free_register()
 
         # Writing constant
         if isinstance(self.x, Constant):
-            code = self.x.generate_code(reg.name)
-            code.append(STORE(reg.name, reg.name))
+            code = self.x.generate_code(regy.name)
+            code += [RESET(regx.name), STORE(regy.name, regx.name)]
 
         # Writing variable
         else:
-            code = Constant(self.x.memory_block).generate_code(reg)
+            code = Constant(self.x.memory_block).generate_code(regx)
 
         # Write onto screen
-        code.append(PUT(reg.name))
+        code.append(PUT(regx.name))
 
         # Unlock register
-        reg.unlock()
+        regx.unlock()
+        regy.unlock()
 
         return code

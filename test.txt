@@ -7,8 +7,11 @@ BEGIN
     d := a % 12;
     e := a % 56;
     
+    WRITE a;
     WRITE b;
     WRITE c;
-    WRITE d;
-    WRITE e;
+
+    a := a / 5;
+
+    WRITE a;
 END

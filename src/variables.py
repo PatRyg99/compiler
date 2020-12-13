@@ -7,7 +7,7 @@ class VariableManager:
     """VariableManager of arrays and variables"""
     variables = {}
     arrays = {}
-    next_memory_block = 0
+    next_memory_block = 1
 
     @staticmethod
     def _check_redeclaration(name: str, lineno: int):
