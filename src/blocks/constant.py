@@ -5,10 +5,10 @@ class Constant:
     def __init__(self, value: int):
         self.value = value
 
-    def generate_code(self, reg: Register):
+    def generate_code(self, reg: str):
 
         # Reset operational register
-        code = [RESET(reg.name)]
+        code = [RESET(reg)]
 
         # If value 0
         if self.value == 0:
@@ -18,11 +18,11 @@ class Constant:
         else:
             bin_value = bin(self.value)[2:]
 
-            code.append(INC(reg.name))
+            code.append(INC(reg))
 
             for bit in bin_value[1:]:
-                code.append(SHL(reg.name))
+                code.append(SHL(reg))
                 if bit == "1":
-                    code.append(INC(reg.name))
+                    code.append(INC(reg))
 
         return code

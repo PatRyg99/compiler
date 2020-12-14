@@ -19,46 +19,46 @@ class BinaryOperation:
         self.y = y
         self.lineno = lineno
 
+        self.regs = ["b", "c", "d", "e"]
+
     def eval_num(self):
         """Evaluate operation on constants"""
         raise NotImplementedError()
 
-    def eval_mem(self, regx, regy):
+    def eval_mem(self, regx: str, regy: str):
         """Evaluate operation on memory registers"""
         raise NotImplementedError()
 
-    def generate_code(self, regx: Register):
+    def generate_code(self, regx: str):
+
+        regy = self.regs[0]
 
         # If both values are numbers than evaluate constant
         if isinstance(self.x, Constant) and isinstance(self.y, Constant):
             return Constant(self.eval_num()).generate_code(regx)
 
-        regy = RegisterManager.get_free_register()
-
         # If x is number than y is in memory
         if isinstance(self.x, Constant):
             x_code = self.x.generate_code(regx)
             y_code = Constant(self.y.memory_block).generate_code(regy)
-            y_code.append(LOAD(regy.name, regy.name))
+            y_code.append(LOAD(regy, regy))
 
         # If y is number than x is in memory
         elif isinstance(self.y, Constant):
             y_code = self.y.generate_code(regy)
             x_code = Constant(self.x.memory_block).generate_code(regx)
-            x_code.append(LOAD(regx.name, regx.name))
+            x_code.append(LOAD(regx, regx))
 
         # Otherwise both are in memory
         else:
             x_code = Constant(self.x.memory_block).generate_code(regx)
-            x_code.append(LOAD(regx.name, regx.name))
+            x_code.append(LOAD(regx, regx))
             y_code = Constant(self.y.memory_block).generate_code(regy)
-            y_code.append(LOAD(regy.name, regy.name))
+            y_code.append(LOAD(regy, regy))
 
         # Generating code
         code = x_code + y_code
         code += self.eval_mem(regx, regy)
-
-        regy.unlock()
 
         return code
 
@@ -67,39 +67,37 @@ class Plus(BinaryOperation):
     def eval_num(self):
         return self.x.value + self.y.value
 
-    def eval_mem(self, regx: Register, regy: Register):
-        return [ADD(regx.name, regy.name)]
+    def eval_mem(self, regx: str, regy: str):
+        return [ADD(regx, regy)]
 
 class Minus(BinaryOperation):
     def eval_num(self):
         return min(0, self.x.value - self.y.value)
 
-    def eval_mem(self, regx: Register, regy: Register):
-        return [SUB(regx.name, regy.name)]
+    def eval_mem(self, regx: str, regy: str):
+        return [SUB(regx, regy)]
 
 class Multiply(BinaryOperation):
     def eval_num(self):
         return self.x.value * self.y.value
 
-    def eval_mem(self, regx: Register, regy: Register):
-        regz = RegisterManager.get_free_register()
+    def eval_mem(self, regx: str, regy: str):
+        out = self.regs[1]
 
         code = [
-            RESET(regz.name),
+            RESET(out),
 
-            JZERO(regx.name, 7),
-            JODD(regx.name, 2),
+            JZERO(regx, 7),
+            JODD(regx, 2),
             JUMP(2),
-            ADD(regz.name, regy.name),
-            SHR(regx.name),
-            SHL(regy.name),
+            ADD(out, regy),
+            SHR(regx),
+            SHL(regy),
             JUMP(-6),
 
-            RESET(regx.name),
-            ADD(regx.name, regz.name)
+            RESET(regx),
+            ADD(regx, out)
         ]
-
-        regz.unlock()
 
         return code
 
@@ -118,58 +116,66 @@ class Divide(BinaryOperation):
         else:
             return self.x.value // self.y.value
 
-    def eval_mem(self, regx: Register, regy: Register):
-        regz = RegisterManager.get_free_register()
-        regw = RegisterManager.get_free_register()
-        regv = RegisterManager.get_free_register()
+    def eval_mem(self, regx: str, regy: str):
+
+        quotient = self.regs[1]
+        condition = self.regs[2]
+        shifter = self.regs[3]
 
         code = [
-            RESET(regz.name),
+            RESET(quotient),
 
             # Check if divisor is not 0
-            JZERO(regy.name, 22),
+            JZERO(regy, 29),
 
-            RESET(regv.name),
+            # Check if divisor bigger than divident - if so return
+            RESET(condition),
+            ADD(condition, regy),
+            SUB(condition, regx),
+            JZERO(condition, 2),
+            JUMP(25),
+
+            RESET(shifter),
 
             # Aligning left most bits
-            RESET(regw.name),
-            ADD(regw.name, regx.name),
-            SUB(regw.name, regy.name),
-            JZERO(regw.name, 4),
-            INC(regv.name),
-            SHL(regy.name),
+            RESET(condition),
+            ADD(condition, regx),
+            SUB(condition, regy),
+            JZERO(condition, 4),
+            INC(shifter),
+            SHL(regy),
             JUMP(-5),
 
+            # Move once more for equal numbers handling
+            SHL(regy),
+            INC(shifter),
+
             # Division loop
-            SHR(regy.name),
-            DEC(regv.name),
-            RESET(regw.name),
-            ADD(regw.name, regy.name),
-            SUB(regw.name, regx.name),
-            JZERO(regw.name, 3),
+            SHR(regy),
+            DEC(shifter),
+            RESET(condition),
+            ADD(condition, regy),
+            SUB(condition, regx),
+            JZERO(condition, 3),
 
             # If divisor is larger than divident
-            SHL(regz.name),
+            SHL(quotient),
             JUMP(4),
 
             # Else if divident is larger or equal
-            SUB(regx.name, regy.name),
-            SHL(regz.name),
-            INC(regz.name),
+            SUB(regx, regy),
+            SHL(quotient),
+            INC(quotient),
 
             # End loop when divident is back to its original form
-            JZERO(regv.name, 3),
+            JZERO(shifter, 3),
             JUMP(-12),
 
-            # If divident is zero
-            RESET(regx.name)
+            # If divisor is zero - reset divident
+            RESET(regx)
         ]
 
         if not self.modulo:
-            code += [RESET(regx.name), ADD(regx.name, regz.name)]
-
-        regz.unlock()
-        regw.unlock()
-        regv.unlock()
+            code += [RESET(regx), ADD(regx, quotient)]
 
         return code

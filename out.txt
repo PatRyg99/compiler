@@ -1,12 +1,8 @@
 RESET a
 INC a
 SHL a
-INC a
-SHL a
-SHL a
 SHL a
 INC a
-SHL a
 SHL a
 RESET b
 INC b
@@ -14,29 +10,41 @@ STORE a b
 RESET a
 INC a
 LOAD a a
+RESET b
+INC b
+SHL b
+INC b
+SHL b
+INC b
 RESET c
+JZERO b 29
 RESET d
-JZERO c 22
-RESET f
+ADD d b
+SUB d a
+JZERO d 2
+JUMP 25
 RESET e
-ADD e a
-SUB e c
-JZERO e 4
-INC f
-SHL c
+RESET d
+ADD d a
+SUB d b
+JZERO d 4
+INC e
+SHL b
 JUMP -5
-SHR c
-DEC f
-RESET e
-ADD e c
-SUB e a
-JZERO e 3
-SHL d
+SHL b
+INC e
+SHR b
+DEC e
+RESET d
+ADD d b
+SUB d a
+JZERO d 3
+SHL c
 JUMP 4
-SUB a c
-SHL d
-INC d
-JZERO f 3
+SUB a b
+SHL c
+INC c
+JZERO e 3
 JUMP -12
 RESET a
 RESET b
@@ -46,33 +54,43 @@ STORE a b
 RESET a
 INC a
 LOAD a a
+RESET b
+INC b
+SHL b
+SHL b
+INC b
+SHL b
 RESET c
+JZERO b 29
 RESET d
-JZERO c 22
-RESET f
+ADD d b
+SUB d a
+JZERO d 2
+JUMP 25
 RESET e
-ADD e a
-SUB e c
-JZERO e 4
-INC f
-SHL c
+RESET d
+ADD d a
+SUB d b
+JZERO d 4
+INC e
+SHL b
 JUMP -5
-SHR c
-DEC f
-RESET e
-ADD e c
-SUB e a
-JZERO e 3
-SHL d
+SHL b
+INC e
+SHR b
+DEC e
+RESET d
+ADD d b
+SUB d a
+JZERO d 3
+SHL c
 JUMP 4
-SUB a c
-SHL d
-INC d
-JZERO f 3
+SUB a b
+SHL c
+INC c
+JZERO e 3
 JUMP -12
 RESET a
-RESET a
-ADD a d
 RESET b
 INC b
 SHL b
@@ -81,34 +99,41 @@ STORE a b
 RESET a
 INC a
 LOAD a a
+RESET b
+INC b
+SHL b
+INC b
+SHL b
+SHL b
 RESET c
-INC c
-SHL c
-INC c
-SHL c
-SHL c
+JZERO b 29
 RESET d
-JZERO c 22
-RESET f
+ADD d b
+SUB d a
+JZERO d 2
+JUMP 25
 RESET e
-ADD e a
-SUB e c
-JZERO e 4
-INC f
-SHL c
+RESET d
+ADD d a
+SUB d b
+JZERO d 4
+INC e
+SHL b
 JUMP -5
-SHR c
-DEC f
-RESET e
-ADD e c
-SUB e a
-JZERO e 3
-SHL d
+SHL b
+INC e
+SHR b
+DEC e
+RESET d
+ADD d b
+SUB d a
+JZERO d 3
+SHL c
 JUMP 4
-SUB a c
-SHL d
-INC d
-JZERO f 3
+SUB a b
+SHL c
+INC c
+JZERO e 3
 JUMP -12
 RESET a
 RESET b
@@ -119,39 +144,45 @@ STORE a b
 RESET a
 INC a
 LOAD a a
+RESET b
+INC b
+SHL b
+INC b
+SHL b
+INC b
 RESET c
-INC c
-SHL c
-INC c
-SHL c
-INC c
-SHL c
-SHL c
-SHL c
+JZERO b 29
 RESET d
-JZERO c 22
-RESET f
+ADD d b
+SUB d a
+JZERO d 2
+JUMP 25
 RESET e
-ADD e a
-SUB e c
-JZERO e 4
-INC f
-SHL c
+RESET d
+ADD d a
+SUB d b
+JZERO d 4
+INC e
+SHL b
 JUMP -5
-SHR c
-DEC f
-RESET e
-ADD e c
-SUB e a
-JZERO e 3
-SHL d
+SHL b
+INC e
+SHR b
+DEC e
+RESET d
+ADD d b
+SUB d a
+JZERO d 3
+SHL c
 JUMP 4
-SUB a c
-SHL d
-INC d
-JZERO f 3
+SUB a b
+SHL c
+INC c
+JZERO e 3
 JUMP -12
 RESET a
+RESET a
+ADD a c
 RESET b
 INC b
 SHL b
@@ -159,55 +190,192 @@ SHL b
 INC b
 STORE a b
 RESET a
+INC a
+LOAD a a
+RESET b
+INC b
+SHL b
+SHL b
+INC b
+SHL b
+RESET c
+JZERO b 29
+RESET d
+ADD d b
+SUB d a
+JZERO d 2
+JUMP 25
+RESET e
+RESET d
+ADD d a
+SUB d b
+JZERO d 4
+INC e
+SHL b
+JUMP -5
+SHL b
+INC e
+SHR b
+DEC e
+RESET d
+ADD d b
+SUB d a
+JZERO d 3
+SHL c
+JUMP 4
+SUB a b
+SHL c
+INC c
+JZERO e 3
+JUMP -12
+RESET a
+RESET a
+ADD a c
+RESET b
+INC b
+SHL b
+INC b
+SHL b
+STORE a b
+RESET a
+INC a
+LOAD a a
+RESET b
+INC b
+SHL b
+INC b
+SHL b
+SHL b
+RESET c
+JZERO b 29
+RESET d
+ADD d b
+SUB d a
+JZERO d 2
+JUMP 25
+RESET e
+RESET d
+ADD d a
+SUB d b
+JZERO d 4
+INC e
+SHL b
+JUMP -5
+SHL b
+INC e
+SHR b
+DEC e
+RESET d
+ADD d b
+SUB d a
+JZERO d 3
+SHL c
+JUMP 4
+SUB a b
+SHL c
+INC c
+JZERO e 3
+JUMP -12
+RESET a
+RESET a
+ADD a c
+RESET b
+INC b
+SHL b
+INC b
+SHL b
+INC b
+STORE a b
+RESET a
+INC a
+LOAD a a
+RESET b
+RESET c
+JZERO a 7
+JODD a 2
+JUMP 2
+ADD c b
+SHR a
+SHL b
+JUMP -6
+RESET a
+ADD a c
+RESET b
+INC b
+SHL b
+SHL b
+SHL b
+STORE a b
+RESET a
+INC a
+LOAD a a
+RESET b
+INC b
+SHL b
+SHL b
+INC b
+SHL b
+RESET c
+JZERO a 7
+JODD a 2
+JUMP 2
+ADD c b
+SHR a
+SHL b
+JUMP -6
+RESET a
+ADD a c
+RESET b
+INC b
+SHL b
+SHL b
+SHL b
+INC b
+STORE a b
+RESET a
+INC a
+SHL a
+PUT a
+RESET a
+INC a
+SHL a
 INC a
 PUT a
 RESET a
 INC a
 SHL a
+SHL a
 PUT a
 RESET a
+INC a
+SHL a
+SHL a
+INC a
+PUT a
+RESET a
+INC a
+SHL a
+INC a
+SHL a
+PUT a
+RESET a
+INC a
+SHL a
 INC a
 SHL a
 INC a
 PUT a
 RESET a
 INC a
-LOAD a a
-RESET c
-INC c
-SHL c
-SHL c
-INC c
-RESET d
-JZERO c 22
-RESET f
-RESET e
-ADD e a
-SUB e c
-JZERO e 4
-INC f
-SHL c
-JUMP -5
-SHR c
-DEC f
-RESET e
-ADD e c
-SUB e a
-JZERO e 3
-SHL d
-JUMP 4
-SUB a c
-SHL d
-INC d
-JZERO f 3
-JUMP -12
+SHL a
+SHL a
+SHL a
+PUT a
 RESET a
-RESET a
-ADD a d
-RESET b
-INC b
-STORE a b
-RESET a
+INC a
+SHL a
+SHL a
+SHL a
 INC a
 PUT a
 HALT

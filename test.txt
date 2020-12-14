@@ -1,17 +1,22 @@
 DECLARE
-a, b, c, d, e
+a, b(1:7)
 BEGIN
-    a := 100;
-    b := a % 0;
-    c := a / 0;
-    d := a % 12;
-    e := a % 56;
+    a := 10;
+    b(1) := a % 7;
+    b(2) := a % 10;
+    b(3) := a % 12;
+    b(4) := a / 7;
+    b(5) := a / 10;
+    b(6) := a / 12;
+    b(7) := a * 0;
+    b(8) := a * 10;
     
-    WRITE a;
-    WRITE b;
-    WRITE c;
-
-    a := a / 5;
-
-    WRITE a;
+    WRITE b(1);
+    WRITE b(2);
+    WRITE b(3);
+    WRITE b(4);
+    WRITE b(5);
+    WRITE b(6);
+    WRITE b(7);
+    WRITE b(8);
 END

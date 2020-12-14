@@ -7,26 +7,22 @@ class Write:
         self.x = x
         self.lineno = lineno
 
-    def generate_code(self):
+        self.regs = ["a", "b"]
 
-        # Get free register
-        regx = RegisterManager.get_free_register()
-        regy = RegisterManager.get_free_register()
+    def generate_code(self):
+        mem = self.regs[0]
+        const = self.regs[1]
 
         # Writing constant
         if isinstance(self.x, Constant):
-            code = self.x.generate_code(regy.name)
-            code += [RESET(regx.name), STORE(regy.name, regx.name)]
+            code = self.x.generate_code(const)
+            code += [RESET(mem), STORE(const, mem)]
 
         # Writing variable
         else:
-            code = Constant(self.x.memory_block).generate_code(regx)
+            code = Constant(self.x.memory_block).generate_code(mem)
 
         # Write onto screen
-        code.append(PUT(regx.name))
-
-        # Unlock register
-        regx.unlock()
-        regy.unlock()
+        code.append(PUT(mem))
 
         return code
