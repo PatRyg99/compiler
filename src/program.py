@@ -1,11 +1,11 @@
 class Program:
-    blocks = []
+    def __init__(self, blocks):
+        self.blocks = blocks
 
-    @staticmethod
-    def generate_code():
+    def generate_code(self):
         code = []
 
-        for block in Program.blocks:
+        for block in self.blocks:
             block_code = block.generate_code()
             code += block_code
 

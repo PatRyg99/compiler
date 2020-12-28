@@ -7,10 +7,10 @@ class CompilerLexer(Lexer):
     # List of tokens
     tokens = {
         PLUS, MINUS, MULTIPLY, DIVIDE, MODULO,
-        EQUALS, NOT_EQUALS, LESSER, GREATER, LEQ, GEQ,
+        LEQ, GEQ, EQUALS, NOT_EQUALS, LESSER, GREATER,
         COMMA, ASSIGN, COLON, SEMICOLON, LPARENT, RPARENT,
-        DECLARE, BEGIN, END,
         IF, ELSE, THEN, ENDIF,
+        DECLARE, BEGIN, END,
         WHILE, DO, ENDWHILE,
         REPEAT, UNTIL,
         FOR, FROM, TO, DOWNTO, ENDFOR,
@@ -25,7 +25,7 @@ class CompilerLexer(Lexer):
     # Ignore comment
     ignore_comment = r"\[.*\]"
 
-    # Ignore newline and 
+    # Ignore newline
     @_(r'\n')
     def ignore_newline(self, t):
         self.lineno += len(t.value)
@@ -40,13 +40,13 @@ class CompilerLexer(Lexer):
     MODULO = r"%"
 
     # Conditional operands keywords
+    LEQ = r"<="
+    GEQ = r">="
     EQUALS = r"="
     NOT_EQUALS = r"!="
     LESSER = r"<"
     GREATER = r">"
-    LEQ = r"=<"
-    GEQ = r">="   
-    
+
     # Utility characters
     COMMA = r","
     ASSIGN = r":="
@@ -57,16 +57,16 @@ class CompilerLexer(Lexer):
 
 
     """LANGUAGE KEYWORDS"""
+    # Conditional keywords
+    ENDIF = r"ENDIF"
+    IF = r"IF"
+    ELSE = r"ELSE"
+    THEN = r"THEN"
+
     # Program keywords
     DECLARE = r"DECLARE"
     BEGIN = r"BEGIN"
     END = r"END"
-
-    # Conditional keywords
-    IF = r"IF"
-    ELSE = r"ELSE"
-    THEN = r"THEN"
-    ENDIF = r"ENDIF"
 
     # While loop keywords
     WHILE = r"WHILE"

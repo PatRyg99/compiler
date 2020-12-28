@@ -13,13 +13,14 @@ def main(in_file: str, out_file: str):
     parser = CompilerParser()
 
     tokens = lexer.tokenize(data)
-    parser.parse(tokens)
+    program = parser.parse(tokens)
 
-    code = Program.generate_code()
-
-    with open("out.txt", "w") as f:
-        code.append("HALT")
-        f.write("\n".join(code))
+    if program is not None:
+        code = program.generate_code()
+        
+        with open("out.txt", "w") as f:
+            code.append("HALT")
+            f.write("\n".join(code))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

@@ -3,53 +3,77 @@ from sly import Parser
 from src.lexer import CompilerLexer
 
 from src.variables import VariableManager
-from src.blocks import Write, Assignment, operation_mapper, Constant
 from src.program import Program
+from src.blocks import (
+    Write,
+    Assignment,
+    Constant,
+    IfCondition,
+    IfElseCondition,
+    operation_mapper,
+    condition_mapper
+)
+
 
 class CompilerParser(Parser):
     tokens = CompilerLexer.tokens
 
-    # Program
+    ################# PROGRAM ###################
     @_('BEGIN commands END')
     def program(self, p):
-        return None
+        return Program(reversed(p.commands))
 
     @_('DECLARE declarations BEGIN commands END')
     def program(self, p):
-        return None
+        return Program(reversed(p.commands))
 
-    # Declarations
+
+    ################ DECLARTIONS ###############
     @_('declarations COMMA PIDENTIFIER',
        'PIDENTIFIER'
     )
     def declarations(self, p):
         VariableManager.declare_variable(p.PIDENTIFIER, p.lineno)
+        return None
 
     @_('declarations COMMA PIDENTIFIER LPARENT NUMBER COLON NUMBER RPARENT',
        'PIDENTIFIER LPARENT NUMBER COLON NUMBER RPARENT'
     )
     def declarations(self, p):
         VariableManager.declare_array(p.PIDENTIFIER, (p.NUMBER0, p.NUMBER1), p.lineno)
+        return None
 
-    # Commands
-    @_('commands command',
-       'command'
-    )
+
+    ############### COMMANDS ################
+    @_('commands command')
     def commands(self, p):
-        pass
+        return [p.command] + p.commands
+
+    @_('command')
+    def commands(self, p):
+        return [p.command]
     
-    # Command
+    # Assignment
     @_('identifier ASSIGN expression SEMICOLON')
     def command(self, p):
-        Program.blocks.append(Assignment(p.identifier, p.expression, p.lineno))
+        return Assignment(p.identifier, p.expression, p.lineno)
 
+    # Write
     @_('WRITE value SEMICOLON')
     def command(self, p):
-        Program.blocks.append(Write(p.value, p.lineno))
+        return Write(p.value, p.lineno)
 
-    @_('IF condition THEN commands ELSE commands ENDIF',
-       'IF condition THEN commands ENDIF',
-       'WHILE condition DO commands ENDWHILE',
+    # Else if
+    @_('IF condition THEN commands ELSE commands ENDIF')
+    def command(self, p):
+        return IfElseCondition(p.condition, p.commands0, p.commands1, p.lineno)
+
+    # If
+    @_('IF condition THEN commands ENDIF')
+    def command(self, p):
+        return IfCondition(p.condition, p.commands, p.lineno)
+
+    @_('WHILE condition DO commands ENDWHILE',
        'REPEAT commands UNTIL condition SEMICOLON',
        'FOR PIDENTIFIER FROM value TO value DO commands ENDFOR',
        'FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR',
@@ -58,11 +82,13 @@ class CompilerParser(Parser):
     def command(self, p):
         pass
     
-    # Expression
+
+    ################## EXPRESSIONS ####################
     @_('value')
     def expression(self, p):
         return p.value
 
+    # Arithmentic
     @_('value PLUS value',
        'value MINUS value',
        'value MULTIPLY value',
@@ -72,7 +98,7 @@ class CompilerParser(Parser):
     def expression(self, p):
         return operation_mapper(p[1])(p.value0, p.value1, p.lineno)
 
-    # Condition
+    # Logical
     @_('value EQUALS value',
        'value NOT_EQUALS value',
        'value LESSER value',
@@ -81,7 +107,7 @@ class CompilerParser(Parser):
        'value GEQ value'
     )
     def condition(self, p):
-        pass
+        return condition_mapper(p[1])(p.value0, p.value1, p.lineno)
 
     # Value
     @_('NUMBER')
@@ -90,7 +116,7 @@ class CompilerParser(Parser):
     
     @_('identifier')
     def value(self, p):
-        return p[0]
+        return p.identifier
 
     # Identifier
     @_('PIDENTIFIER')
