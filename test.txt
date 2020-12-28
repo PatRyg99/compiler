@@ -4,21 +4,56 @@ BEGIN
     a := 0;
     b := 1;
 
-
     [ EQUALS ]
-    IF 3 = 3 THEN
-        IF 5 = 3 THEN
-            WRITE a;
-        ELSE
-            WRITE b;
-        ENDIF
+    IF a = b THEN
+        WRITE a;
+    ELSE
+        WRITE b;
+    ENDIF
+
+    IF a = 0 THEN
+        WRITE b;
     ELSE
         WRITE a;
     ENDIF
 
 
     [ NOT EQUALS ]
-    IF 5 != 3 THEN
+    IF a != b THEN
+        WRITE b;
+    ELSE
+        WRITE a;
+    ENDIF
+
+    IF a != 0 THEN
+        WRITE a;
+    ELSE
+        WRITE b;
+    ENDIF
+
+
+    [ GEQ ]
+    IF a >= b THEN
+        WRITE a;
+    ELSE
+        WRITE b;
+    ENDIF
+
+    IF a >= 0 THEN
+        WRITE b;
+    ELSE
+        WRITE a;
+    ENDIF
+
+
+    [ LEQ ]
+    IF a <= b THEN
+        WRITE b;
+    ELSE
+        WRITE a;
+    ENDIF
+
+    IF b <= 1 THEN
         WRITE b;
     ELSE
         WRITE a;
@@ -26,7 +61,13 @@ BEGIN
 
 
     [ LESSER ]
-    IF 3 < 5 THEN
+    IF a < b THEN
+        WRITE b;
+    ELSE
+        WRITE a;
+    ENDIF
+
+    IF a < 10 THEN
         WRITE b;
     ELSE
         WRITE a;
@@ -34,26 +75,16 @@ BEGIN
 
 
     [ GREATER ]
-    IF 5 > 3 THEN
-        WRITE b;
-    ELSE
+    IF a > b THEN
         WRITE a;
+    ELSE
+        WRITE b;
     ENDIF
 
-
-    [ LEQ ] 
-    IF 3 <= 3 THEN
-        WRITE b;
-    ELSE
+    IF a > 10 THEN
         WRITE a;
-    ENDIF
-
-
-    [ GEQ ]
-    IF 3 >= 3 THEN
-        WRITE b;
     ELSE
-        WRITE a;
+        WRITE b;
     ENDIF
 
 END

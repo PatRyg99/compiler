@@ -17,7 +17,7 @@ def main(in_file: str, out_file: str):
 
     if program is not None:
         code = program.generate_code()
-        
+
         with open("out.txt", "w") as f:
             code.append("HALT")
             f.write("\n".join(code))
