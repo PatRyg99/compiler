@@ -129,7 +129,8 @@ class CompilerParser(Parser):
 
     @_('PIDENTIFIER LPARENT PIDENTIFIER RPARENT')
     def identifier(self, p):
-        return None
+        var = VariableManager.get_var(p.PIDENTIFIER1, p.lineno)
+        return VariableManager.get_array_element(p.PIDENTIFIER0, p.lineno, var)
 
     @_('PIDENTIFIER LPARENT NUMBER RPARENT')
     def identifier(self, p):

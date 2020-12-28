@@ -1,17 +1,24 @@
 RESET a
 INC a
-GET a
-RESET a
-INC a
-LOAD a a
-RESET b
-INC b
-SHL b
-ADD a b
+SHL a
 RESET b
 INC b
 STORE a b
 RESET a
 INC a
+SHL a
+SHL a
+INC a
+RESET b
+INC b
+SHL b
+STORE a b
+RESET a
+INC a
+SHL a
+PUT a
+RESET a
+INC a
+SHL a
 PUT a
 HALT

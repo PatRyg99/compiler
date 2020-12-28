@@ -1,9 +1,10 @@
 DECLARE 
-    n
+    n, t(1:5)
 BEGIN
-    READ n;
 
-    n := n + 2;
+    n := 2;
+    t(n) := 5;
 
-    WRITE n;
+    WRITE t(2);
+    WRITE t(n);
 END

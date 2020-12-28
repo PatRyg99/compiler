@@ -32,7 +32,7 @@ class Read:
         self.lineno = lineno
 
         self.regs = ["a"]
-    
+
     def generate_code(self):
         mem = self.regs[0]
         code = Constant(self.x.memory_block).generate_code(mem)

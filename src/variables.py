@@ -1,4 +1,4 @@
-from src.instructions import LOAD
+from src.instructions import ADD, LOAD
 from src.blocks import Constant
 from src.errors import Error
 
@@ -59,7 +59,7 @@ class VariableManager:
     def get_array_element(name: str, lineno: int, idx: int):
         """Getting array element by name and index"""
         try:
-            return VariableManager.arrays[name].get(idx, lineno, name)
+            return VariableManager.arrays[name].get(idx, lineno)
 
         except KeyError:
             if name not in VariableManager.variables.keys():
@@ -77,11 +77,37 @@ class Variable:
 
         return code
 
+class ArrayElement:
+    def __init__(self, memory_block: int, range: tuple, idx):
+        self.memory_block = memory_block
+        self.range = range
+        self.idx = idx
+
+        self.regs = ["c"]
+
+    def generate_code(self, reg):
+
+        # If index is a number - perform variable load
+        if isinstance(self.idx, int):
+            mem_block = self.memory_block + (self.idx - self.range[0])
+            code = Constant(mem_block).generate_code(reg)
+            code.append(LOAD(reg, reg))
+
+        # Otherwise index is a variable
+        else:
+            regv = self.regs[0]
+
+            code = Constant(self.memory_block - self.range[0]).generate_code(reg)
+            code += self.idx.generate_code(regv)
+
+            code += [ADD(reg, regv), LOAD(reg, reg)]
+
+        return code
+
 class Array:
     def __init__(self, memory_block: int, range: tuple):
         self.memory_block = memory_block
         self.range = range
 
-    def get(self, idx: int, lineno: int, name: str):
-        mem_block = self.memory_block + (idx - self.range[0])
-        return Variable(mem_block)
+    def get(self, idx: int, lineno: int):
+        return ArrayElement(self.memory_block, self.range, idx)
