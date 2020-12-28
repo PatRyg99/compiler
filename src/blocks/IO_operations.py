@@ -1,6 +1,5 @@
 from src.instructions import STORE, PUT, RESET
 from src.blocks import Constant
-from src.registers import Register, RegisterManager
 
 class Write:
     def __init__(self, x, lineno):

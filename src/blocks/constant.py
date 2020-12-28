@@ -1,5 +1,4 @@
 from src.instructions import RESET, SHL, INC
-from src.registers import RegisterManager, Register
 
 class Constant:
     def __init__(self, value: int):

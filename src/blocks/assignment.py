@@ -1,6 +1,5 @@
 from src.instructions import STORE
 from src.blocks.constant import Constant
-from src.registers import RegisterManager
 
 class Assignment:
     def __init__(self, var, expression, lineno):

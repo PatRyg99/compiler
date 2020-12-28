@@ -1,7 +1,6 @@
 from src.instructions import LOAD, ADD, SUB, RESET, JZERO, JUMP, DEC, INC, SHL, JODD, SHR
 from src.errors import Error
 from src.blocks.constant import Constant
-from src.registers import Register, RegisterManager
 
 def operation_mapper(operation: str):
     mapper = {
