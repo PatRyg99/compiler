@@ -1,14 +1,69 @@
 RESET a
 INC a
 SHL a
+GET a
+RESET a
+INC a
+SHL a
+SHL a
+INC a
 RESET b
 INC b
 STORE a b
 RESET a
 INC a
 SHL a
+LOAD a a
+RESET b
+INC b
+SHL b
+INC b
+STORE a b
+RESET a
+INC a
 SHL a
 INC a
+LOAD a a
+RESET b
+INC b
+LOAD b b
+SUB a b
+JZERO a 4
+RESET a
+INC a
+JUMP 2
+RESET a
+JZERO a 20
+RESET a
+INC a
+SHL a
+INC a
+PUT a
+RESET a
+INC a
+SHL a
+INC a
+LOAD a a
+RESET b
+INC b
+SUB a b
+RESET b
+INC b
+SHL b
+INC b
+STORE a b
+JUMP -33
+RESET a
+INC a
+SHL a
+PUT a
+RESET a
+INC a
+SHL a
+LOAD a a
+RESET b
+INC b
+SUB a b
 RESET b
 INC b
 SHL b
@@ -16,9 +71,17 @@ STORE a b
 RESET a
 INC a
 SHL a
-PUT a
+LOAD a a
+RESET b
+INC b
+SHL b
+SHL b
+INC b
+SUB b a
+JZERO b 4
 RESET a
 INC a
-SHL a
-PUT a
+JUMP 2
+RESET a
+JZERO a -30
 HALT

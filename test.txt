@@ -1,10 +1,19 @@
 DECLARE 
-    n, t(1:5)
+    n, a, b
 BEGIN
+    READ a;
 
-    n := 2;
-    t(n) := 5;
+    n := 5;
+    b := a;
 
-    WRITE t(2);
-    WRITE t(n);
+    WHILE b > n DO
+        WRITE b;
+        b := b - 1;
+    ENDWHILE
+
+    REPEAT
+        WRITE a;
+        a := a - 1;
+    UNTIL a < 5;
+
 END

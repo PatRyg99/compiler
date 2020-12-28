@@ -1,4 +1,6 @@
 # pylint: skip-file
+# flake8: noqa
+# fmt: off
 from sly import Lexer
 from src.errors import Error
 
@@ -10,12 +12,12 @@ class CompilerLexer(Lexer):
         LEQ, GEQ, EQUALS, NOT_EQUALS, LESSER, GREATER,
         COMMA, ASSIGN, COLON, SEMICOLON, LPARENT, RPARENT,
         IF, ELSE, THEN, ENDIF,
-        DECLARE, BEGIN, END,
         WHILE, DO, ENDWHILE,
         REPEAT, UNTIL,
         FOR, FROM, TO, DOWNTO, ENDFOR,
+        DECLARE, BEGIN, END,
         READ, WRITE,
-        NUMBER, PIDENTIFIER
+        NUMBER, PIDENTIFIER,
     }
 
     """IGNORED CHARACTERS"""
@@ -63,11 +65,6 @@ class CompilerLexer(Lexer):
     ELSE = r"ELSE"
     THEN = r"THEN"
 
-    # Program keywords
-    DECLARE = r"DECLARE"
-    BEGIN = r"BEGIN"
-    END = r"END"
-
     # While loop keywords
     WHILE = r"WHILE"
     DO = r"DO"
@@ -83,6 +80,11 @@ class CompilerLexer(Lexer):
     TO = r"TO"
     DOWNTO = r"DOWNTO"
     ENDFOR = r"ENDFOR"
+
+    # Program keywords
+    DECLARE = r"DECLARE"
+    BEGIN = r"BEGIN"
+    END = r"END"
 
     # IO stream keywords
     READ = r"READ"

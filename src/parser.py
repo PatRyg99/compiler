@@ -1,4 +1,5 @@
 # pylint: skip-file
+# flake8: noqa
 from sly import Parser
 from src.lexer import CompilerLexer
 
@@ -9,10 +10,14 @@ from src.blocks import (
     Constant,
     IfCondition,
     IfElseCondition,
+    WhileLoop,
+    RepeatUntilLoop,
+    ForToLoop,
+    ForDownToLoop,
     Write,
     Read,
     operation_mapper,
-    condition_mapper
+    condition_mapper,
 )
 
 
@@ -20,118 +25,127 @@ class CompilerParser(Parser):
     tokens = CompilerLexer.tokens
 
     ################# PROGRAM ###################
-    @_('BEGIN commands END')
+    @_("BEGIN commands END")
     def program(self, p):
         return Program(reversed(p.commands))
 
-    @_('DECLARE declarations BEGIN commands END')
+    @_("DECLARE declarations BEGIN commands END")
     def program(self, p):
         return Program(reversed(p.commands))
-
 
     ################ DECLARTIONS ###############
-    @_('declarations COMMA PIDENTIFIER',
-       'PIDENTIFIER'
-    )
+    @_("declarations COMMA PIDENTIFIER", "PIDENTIFIER")
     def declarations(self, p):
         VariableManager.declare_variable(p.PIDENTIFIER, p.lineno)
 
-    @_('declarations COMMA PIDENTIFIER LPARENT NUMBER COLON NUMBER RPARENT',
-       'PIDENTIFIER LPARENT NUMBER COLON NUMBER RPARENT'
+    @_(
+        "declarations COMMA PIDENTIFIER LPARENT NUMBER COLON NUMBER RPARENT",
+        "PIDENTIFIER LPARENT NUMBER COLON NUMBER RPARENT",
     )
     def declarations(self, p):
         VariableManager.declare_array(p.PIDENTIFIER, (p.NUMBER0, p.NUMBER1), p.lineno)
 
-
     ############### COMMANDS ################
-    @_('commands command')
+    @_("commands command")
     def commands(self, p):
         return [p.command] + p.commands
 
-    @_('command')
+    @_("command")
     def commands(self, p):
         return [p.command]
-    
+
     # Assignment
-    @_('identifier ASSIGN expression SEMICOLON')
+    @_("identifier ASSIGN expression SEMICOLON")
     def command(self, p):
         return Assignment(p.identifier, p.expression, p.lineno)
 
     # Write
-    @_('WRITE value SEMICOLON')
+    @_("WRITE value SEMICOLON")
     def command(self, p):
         return Write(p.value, p.lineno)
-    
+
     # Read
-    @_('READ PIDENTIFIER SEMICOLON')
+    @_("READ PIDENTIFIER SEMICOLON")
     def command(self, p):
         var = VariableManager.get_var(p.PIDENTIFIER, p.lineno)
         return Read(var, p.lineno)
 
-    # Else if
-    @_('IF condition THEN commands ELSE commands ENDIF')
+    # Else if condition
+    @_("IF condition THEN commands ELSE commands ENDIF")
     def command(self, p):
         return IfElseCondition(p.condition, p.commands0, p.commands1, p.lineno)
 
-    # If
-    @_('IF condition THEN commands ENDIF')
+    # If condition
+    @_("IF condition THEN commands ENDIF")
     def command(self, p):
         return IfCondition(p.condition, p.commands, p.lineno)
 
-    @_('WHILE condition DO commands ENDWHILE',
-       'REPEAT commands UNTIL condition SEMICOLON',
-       'FOR PIDENTIFIER FROM value TO value DO commands ENDFOR',
-       'FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR',
-    )
+    # While loop
+    @_("WHILE condition DO commands ENDWHILE")
     def command(self, p):
-        pass
-    
+        return WhileLoop(p.condition, p.commands, p.lineno)
+
+    # Repeat until loop
+    @_("REPEAT commands UNTIL condition SEMICOLON")
+    def command(self, p):
+        return RepeatUntilLoop(p.condition, p.commands, p.lineno)
+
+    # For loop
+    @_("FOR PIDENTIFIER FROM value TO value DO commands ENDFOR")
+    def command(self, p):
+        return ForToLoop(p.PIDENTIFIER, p.value0, p.value1, p.commands)
+
+    @_("FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR")
+    def command(self, p):
+        return ForDownToLoop(p.PIDENTIFIER, p.value0, p.value1, p.commands)
 
     ################## EXPRESSIONS ####################
-    @_('value')
+    @_("value")
     def expression(self, p):
         return p.value
 
     # Arithmentic
-    @_('value PLUS value',
-       'value MINUS value',
-       'value MULTIPLY value',
-       'value DIVIDE value',
-       'value MODULO value'
+    @_(
+        "value PLUS value",
+        "value MINUS value",
+        "value MULTIPLY value",
+        "value DIVIDE value",
+        "value MODULO value",
     )
     def expression(self, p):
         return operation_mapper(p[1])(p.value0, p.value1, p.lineno)
 
     # Logical
-    @_('value EQUALS value',
-       'value NOT_EQUALS value',
-       'value LESSER value',
-       'value GREATER value',
-       'value LEQ value',
-       'value GEQ value'
+    @_(
+        "value EQUALS value",
+        "value NOT_EQUALS value",
+        "value LESSER value",
+        "value GREATER value",
+        "value LEQ value",
+        "value GEQ value",
     )
     def condition(self, p):
         return condition_mapper(p[1])(p.value0, p.value1, p.lineno)
 
     # Value
-    @_('NUMBER')
+    @_("NUMBER")
     def value(self, p):
         return Constant(p.NUMBER)
-    
-    @_('identifier')
+
+    @_("identifier")
     def value(self, p):
         return p.identifier
 
     # Identifier
-    @_('PIDENTIFIER')
+    @_("PIDENTIFIER")
     def identifier(self, p):
         return VariableManager.get_var(p.PIDENTIFIER, p.lineno)
 
-    @_('PIDENTIFIER LPARENT PIDENTIFIER RPARENT')
+    @_("PIDENTIFIER LPARENT PIDENTIFIER RPARENT")
     def identifier(self, p):
         var = VariableManager.get_var(p.PIDENTIFIER1, p.lineno)
         return VariableManager.get_array_element(p.PIDENTIFIER0, p.lineno, var)
 
-    @_('PIDENTIFIER LPARENT NUMBER RPARENT')
+    @_("PIDENTIFIER LPARENT NUMBER RPARENT")
     def identifier(self, p):
         return VariableManager.get_array_element(p.PIDENTIFIER, p.lineno, p.NUMBER)

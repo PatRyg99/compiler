@@ -36,23 +36,8 @@ class BinaryOperation:
         if isinstance(self.x, Constant) and isinstance(self.y, Constant):
             return Constant(self.eval_num()).generate_code(regx)
 
-        # # If x is number than y is in memory
-        # if isinstance(self.x, Constant):
         x_code = self.x.generate_code(regx)
         y_code = self.y.generate_code(regy)
-
-        # # If y is number than x is in memory
-        # elif isinstance(self.y, Constant):
-        #     y_code = self.y.generate_code(regy)
-        #     x_code = Constant(self.x.memory_block).generate_code(regx)
-        #     x_code.append(LOAD(regx, regx))
-
-        # # Otherwise both are in memory
-        # else:
-        #     x_code = Constant(self.x.memory_block).generate_code(regx)
-        #     x_code.append(LOAD(regx, regx))
-        #     y_code = Constant(self.y.memory_block).generate_code(regy)
-        #     y_code.append(LOAD(regy, regy))
 
         # Generating code
         code = x_code + y_code

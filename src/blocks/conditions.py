@@ -1,6 +1,19 @@
 from src.errors import Error
 from src.blocks.constant import Constant
-from src.instructions import LOAD, ADD, SUB, RESET, JZERO, JUMP, DEC, INC, SHL, JODD, SHR
+from src.instructions import (
+    LOAD,
+    ADD,
+    SUB,
+    RESET,
+    JZERO,
+    JUMP,
+    DEC,
+    INC,
+    SHL,
+    JODD,
+    SHR,
+)
+
 
 def condition_mapper(operation: str):
     mapper = {
@@ -9,9 +22,10 @@ def condition_mapper(operation: str):
         "<": Lesser,
         ">": Greater,
         "<=": LEQ,
-        ">=": GEQ
+        ">=": GEQ,
     }
     return mapper[operation]
+
 
 class Condition:
     def __init__(self, x, y, lineno):
@@ -46,30 +60,12 @@ class Condition:
         x_code = self.x.generate_code(regx)
         y_code = self.y.generate_code(regy)
 
-        # # If x is number than y is in memory
-        # if isinstance(self.x, Constant):
-        #     x_code = self.x.generate_code(regx)
-        #     y_code = Constant(self.y.memory_block).generate_code(regy)
-        #     y_code.append(LOAD(regy, regy))
-
-        # # If y is number than x is in memory
-        # elif isinstance(self.y, Constant):
-        #     y_code = self.y.generate_code(regy)
-        #     x_code = Constant(self.x.memory_block).generate_code(regx)
-        #     x_code.append(LOAD(regx, regx))
-
-        # # Otherwise both are in memory
-        # else:
-        #     x_code = Constant(self.x.memory_block).generate_code(regx)
-        #     x_code.append(LOAD(regx, regx))
-        #     y_code = Constant(self.y.memory_block).generate_code(regy)
-        #     y_code.append(LOAD(regy, regy))
-
         # Generating code
         code = x_code + y_code
         code += self.eval_mem(regx, regy)
 
         return code
+
 
 class Equals(Condition):
     def eval_num(self):
@@ -79,35 +75,30 @@ class Equals(Condition):
         regz = self.regs[1]
 
         code = [
-
             # Copy x to z
             RESET(regz),
             ADD(regz, regx),
-
             # Perform substraction x - y
             SUB(regz, regy),
             JZERO(regz, 2),
             JUMP(9),
-
             # Copy y to z
             RESET(regz),
             ADD(regz, regy),
-
             # Perform substraction y - x
             SUB(regz, regx),
             JZERO(regz, 2),
             JUMP(4),
-
             # If both substractions are zero - EQUALS
             RESET(regx),
             INC(regx),
             JUMP(2),
-
             # Else not equals
-            RESET(regx)
+            RESET(regx),
         ]
 
         return code
+
 
 class NotEquals(Condition):
     def eval_num(self):
@@ -117,29 +108,23 @@ class NotEquals(Condition):
         regz = self.regs[1]
 
         code = [
-
             # Copy x to z
             RESET(regz),
             ADD(regz, regx),
-
             # Perform substraction x - y
             SUB(regz, regy),
             JZERO(regz, 2),
             JUMP(8),
-
             # Copy y to z
             RESET(regz),
             ADD(regz, regy),
-
             # Perform substraction y - x
             SUB(regz, regx),
             JZERO(regz, 2),
             JUMP(3),
-
             # If both substractions are zero - EQUALS
             RESET(regx),
             JUMP(3),
-
             # Else not equals
             RESET(regx),
             INC(regx),
@@ -147,27 +132,26 @@ class NotEquals(Condition):
 
         return code
 
+
 class Lesser(Condition):
     def eval_num(self):
         return 1 if self.x.value < self.y.value else 0
 
     def eval_mem(self, regx: str, regy: str):
         code = [
-
             # Perform substraction and check if no 0
             SUB(regy, regx),
             JZERO(regy, 4),
-
             # If not zero return 1
             RESET(regx),
             INC(regx),
             JUMP(2),
-
             # Else return 0
-            RESET(regx)
+            RESET(regx),
         ]
 
         return code
+
 
 class Greater(Condition):
     def eval_num(self):
@@ -175,21 +159,19 @@ class Greater(Condition):
 
     def eval_mem(self, regx: str, regy: str):
         code = [
-
             # Perform substraction and check if no 0
             SUB(regx, regy),
             JZERO(regx, 4),
-
             # If not zero return 1
             RESET(regx),
             INC(regx),
             JUMP(2),
-
             # Else return 0
-            RESET(regx)
+            RESET(regx),
         ]
 
         return code
+
 
 class LEQ(Lesser):
     def eval_num(self):
@@ -202,6 +184,7 @@ class LEQ(Lesser):
         code += super().eval_mem(regx, regy)
 
         return code
+
 
 class GEQ(Greater):
     def eval_num(self):
