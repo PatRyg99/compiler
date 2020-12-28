@@ -5,11 +5,12 @@ from src.lexer import CompilerLexer
 from src.variables import VariableManager
 from src.program import Program
 from src.blocks import (
-    Write,
     Assignment,
     Constant,
     IfCondition,
     IfElseCondition,
+    Write,
+    Read,
     operation_mapper,
     condition_mapper
 )
@@ -34,14 +35,12 @@ class CompilerParser(Parser):
     )
     def declarations(self, p):
         VariableManager.declare_variable(p.PIDENTIFIER, p.lineno)
-        return None
 
     @_('declarations COMMA PIDENTIFIER LPARENT NUMBER COLON NUMBER RPARENT',
        'PIDENTIFIER LPARENT NUMBER COLON NUMBER RPARENT'
     )
     def declarations(self, p):
         VariableManager.declare_array(p.PIDENTIFIER, (p.NUMBER0, p.NUMBER1), p.lineno)
-        return None
 
 
     ############### COMMANDS ################
@@ -62,6 +61,12 @@ class CompilerParser(Parser):
     @_('WRITE value SEMICOLON')
     def command(self, p):
         return Write(p.value, p.lineno)
+    
+    # Read
+    @_('READ PIDENTIFIER SEMICOLON')
+    def command(self, p):
+        var = VariableManager.get_var(p.PIDENTIFIER, p.lineno)
+        return Read(var, p.lineno)
 
     # Else if
     @_('IF condition THEN commands ELSE commands ENDIF')
@@ -77,7 +82,6 @@ class CompilerParser(Parser):
        'REPEAT commands UNTIL condition SEMICOLON',
        'FOR PIDENTIFIER FROM value TO value DO commands ENDFOR',
        'FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR',
-       'READ PIDENTIFIER SEMICOLON',
     )
     def command(self, p):
         pass

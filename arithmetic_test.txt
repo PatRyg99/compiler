@@ -1,0 +1,32 @@
+DECLARE
+    a, b, c
+BEGIN
+    a := 10;
+    b := 4;
+
+    c := a + b;
+    WRITE c;
+
+    c := a - b;
+    WRITE c;
+
+    c := a / b;
+    WRITE c;
+
+    c := a % b;
+    WRITE c;
+
+
+    c := a + 11;
+    WRITE c;
+
+    c := a - 11;
+    WRITE c;
+
+    c := a / 11;
+    WRITE c;
+
+    c := a % 11;
+    WRITE c;
+
+END

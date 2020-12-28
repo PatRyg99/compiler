@@ -1,4 +1,4 @@
-from src.instructions import STORE, PUT, RESET
+from src.instructions import STORE, PUT, RESET, GET
 from src.blocks import Constant
 
 class Write:
@@ -23,5 +23,19 @@ class Write:
 
         # Write onto screen
         code.append(PUT(mem))
+
+        return code
+
+class Read:
+    def __init__(self, x, lineno):
+        self.x = x
+        self.lineno = lineno
+
+        self.regs = ["a"]
+    
+    def generate_code(self):
+        mem = self.regs[0]
+        code = Constant(self.x.memory_block).generate_code(mem)
+        code.append(GET(mem))
 
         return code
