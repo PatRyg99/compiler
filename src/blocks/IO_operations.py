@@ -1,6 +1,7 @@
 from src.instructions import STORE, PUT, RESET, GET
 from src.blocks import Constant
 
+
 class Write:
     def __init__(self, x, lineno):
         self.x = x
@@ -19,12 +20,13 @@ class Write:
 
         # Writing variable
         else:
-            code = Constant(self.x.memory_block).generate_code(mem)
+            code = self.x.generate_mem(mem)
 
         # Write onto screen
         code.append(PUT(mem))
 
         return code
+
 
 class Read:
     def __init__(self, x, lineno):
@@ -35,7 +37,7 @@ class Read:
 
     def generate_code(self):
         mem = self.regs[0]
-        code = Constant(self.x.memory_block).generate_code(mem)
+        code = self.x.generate_mem(mem)
         code.append(GET(mem))
 
         return code

@@ -65,7 +65,7 @@ class VariableManager:
 
         except KeyError:
             if name not in VariableManager.arrays.keys():
-                Error.VariableNotDeclared.throw(lineno)
+                return UndeclaredIterator(name, lineno)
             else:
                 Error.ArrayNotIndexed.throw(lineno)
 
@@ -86,8 +86,11 @@ class Variable:
     def __init__(self, memory_block: int):
         self.memory_block = memory_block
 
-    def generate_code(self, reg):
-        code = Constant(self.memory_block).generate_code(reg)
+    def generate_mem(self, reg: str):
+        return Constant(self.memory_block).generate_code(reg)
+
+    def generate_code(self, reg: str):
+        code = self.generate_mem(reg)
         code.append(LOAD(reg, reg))
 
         return code
@@ -101,13 +104,12 @@ class ArrayElement:
 
         self.regs = ["c"]
 
-    def generate_code(self, reg):
+    def generate_mem(self, reg: str):
 
         # If index is a number - perform variable load
         if isinstance(self.idx, int):
             mem_block = self.memory_block + (self.idx - self.range[0])
             code = Constant(mem_block).generate_code(reg)
-            code.append(LOAD(reg, reg))
 
         # Otherwise index is a variable
         else:
@@ -116,7 +118,14 @@ class ArrayElement:
             code = Constant(self.memory_block - self.range[0]).generate_code(reg)
             code += self.idx.generate_code(regv)
 
-            code += [ADD(reg, regv), LOAD(reg, reg)]
+            code += [ADD(reg, regv)]
+
+        return code
+
+    def generate_code(self, reg: str):
+
+        code = self.generate_mem(reg)
+        code.append(LOAD(reg, reg))
 
         return code
 
@@ -128,6 +137,24 @@ class Array:
 
     def get(self, idx: int, lineno: int):
         return ArrayElement(self.memory_block, self.range, idx)
+
+
+class UndeclaredIterator:
+    def __init__(self, name: str, lineno: int):
+        self.name = name
+        self.lineno = lineno
+
+    def declare(self):
+        if self.name in VariableManager.iterators.keys():
+            return VariableManager.iterators[self.name]
+        else:
+            Error.VariableNotDeclared.throw(self.lineno)
+
+    def generate_mem(self, reg: str):
+        return self.declare().generate_mem(reg)
+
+    def generate_code(self, reg: str):
+        return self.declare().generate_code(reg)
 
 
 class Iterator:
@@ -169,8 +196,11 @@ class Iterator:
 
         return code
 
+    def generate_mem(self, reg: str):
+        return Constant(self.memory_block).generate_code(reg)
+
     def generate_code(self, reg: str):
-        code = Constant(self.memory_block).generate_code(reg)
+        code = self.generate_mem(reg)
         code.append(LOAD(reg, reg))
 
         return code

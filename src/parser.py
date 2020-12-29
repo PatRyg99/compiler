@@ -65,10 +65,9 @@ class CompilerParser(Parser):
         return Write(p.value, p.lineno)
 
     # Read
-    @_("READ PIDENTIFIER SEMICOLON")
+    @_("READ identifier SEMICOLON")
     def command(self, p):
-        var = VariableManager.get_var(p.PIDENTIFIER, p.lineno)
-        return Read(var, p.lineno)
+        return Read(p.identifier, p.lineno)
 
     # Else if condition
     @_("IF condition THEN commands ELSE commands ENDIF")

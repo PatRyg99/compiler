@@ -1,6 +1,7 @@
 from src.instructions import STORE
 from src.blocks.constant import Constant
 
+
 class Assignment:
     def __init__(self, var, expression, lineno):
         self.var = var
@@ -15,7 +16,7 @@ class Assignment:
         expression_code = self.expression.generate_code(self.regs[0])
 
         # Generate code for variable memory block - to register 2
-        var_code = Constant(self.var.memory_block).generate_code(self.regs[1])
+        var_code = self.var.generate_mem(self.regs[1])
 
         # Append codes and add store
         code = expression_code + var_code
