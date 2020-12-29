@@ -1,4 +1,4 @@
-from src.instructions import ADD, LOAD, STORE, INC, DEC
+from src.instructions import ADD, LOAD, STORE, INC, DEC, RESET, JZERO
 from src.blocks import Constant
 from src.errors import Error
 
@@ -186,7 +186,7 @@ class Iterator:
         regc = self.regs[0]
 
         code = Constant(self.memory_block).generate_code(reg)
-        code += [LOAD(regc, reg), DEC(regc), STORE(regc, reg)]
+        code += [LOAD(regc, reg), JZERO(regc, 4), DEC(regc), STORE(regc, reg)]
 
         return code
 

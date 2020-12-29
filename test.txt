@@ -1,24 +1,10 @@
 DECLARE
-    n, j, sito(2:100)
+    t(1:10)
 BEGIN
-    n := 100;
+    t(2) := 5;
+    t(5) := 10;
 
-    FOR i FROM n DOWNTO 2 DO
-        sito(i) := 1;
-    ENDFOR
-
-    FOR i FROM 2 TO n DO
-
-        IF sito(i) != 0 THEN
-            j := i + i;
-
-            WHILE j <= n DO
-                sito(j) := 0;
-                j := j + i;
-            ENDWHILE
-
-            WRITE i;
-        ENDIF
-
+    FOR i FROM t(2) TO t(5) DO
+        WRITE i;
     ENDFOR
 END

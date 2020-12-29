@@ -73,7 +73,7 @@ class IteratorLoop:
         if isinstance(self.start, Constant):
             start_code = self.start.generate_code(reg)
         else:
-            start_code = Constant(self.start.memory_block).generate_code(reg)
+            start_code = self.start.generate_mem(reg)
             start_code.append(LOAD(reg, reg))
 
         start_code += VariableManager.iterators[self.iter_name].allocate_start(reg)
@@ -82,7 +82,7 @@ class IteratorLoop:
         if isinstance(self.end, Constant):
             end_code = self.end.generate_code(reg)
         else:
-            end_code = Constant(self.end.memory_block).generate_code(reg)
+            end_code = self.end.generate_mem(reg)
             end_code.append(LOAD(reg, reg))
 
         end_code += VariableManager.iterators[self.iter_name].allocate_end(reg)
@@ -148,7 +148,7 @@ class ForDownToLoop(IteratorLoop):
         cond_reg = self.regs[1]
 
         cond_code = iterator.generate_code(iter_reg)
-        cond_code += iterator.generate_code(cond_reg)
+        cond_code += iterator.generate_end_code(cond_reg)
         cond_code += [
             # Check GEQ
             INC(iter_reg),
@@ -165,7 +165,7 @@ class ForDownToLoop(IteratorLoop):
         dec_code += [JUMP(-(len(cond_code) + len(loop_code) + len(dec_code) + 1))]
 
         # Add jump to condition
-        cond_code.append(JZERO(cond_reg, len(dec_code) + len(loop_code) + 1))
+        cond_code.append(JZERO(iter_reg, len(dec_code) + len(loop_code) + 1))
 
         # Undeclare iterator
         self.undeclare_iter()

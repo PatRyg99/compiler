@@ -2,6 +2,7 @@
 # flake8: noqa
 from sly import Parser
 from src.lexer import CompilerLexer
+from src.errors import Error
 
 from src.variables import VariableManager
 from src.program import Program
@@ -148,3 +149,7 @@ class CompilerParser(Parser):
     @_("PIDENTIFIER LPARENT NUMBER RPARENT")
     def identifier(self, p):
         return VariableManager.get_array_element(p.PIDENTIFIER, p.lineno, p.NUMBER)
+
+    # Error handling on an unmatched grammar rule
+    def error(self, p):
+        Error.Syntax.throw(p.lineno)

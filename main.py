@@ -4,6 +4,7 @@ from src.parser import CompilerParser
 from src.variables import VariableManager
 from src.program import Program
 
+
 def main(in_file: str, out_file: str):
 
     with open(in_file, "r") as f:
@@ -21,6 +22,7 @@ def main(in_file: str, out_file: str):
         with open("out.txt", "w") as f:
             code.append("HALT")
             f.write("\n".join(code))
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

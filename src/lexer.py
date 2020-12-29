@@ -25,7 +25,7 @@ class CompilerLexer(Lexer):
     ignore_blank = r"[ \t]"
 
     # Ignore comment
-    ignore_comment = r"\[.*\]"
+    ignore_comment = r"\[(.|\n)*?\]"
 
     # Ignore newline
     @_(r'\n')

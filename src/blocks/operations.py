@@ -1,6 +1,19 @@
-from src.instructions import LOAD, ADD, SUB, RESET, JZERO, JUMP, DEC, INC, SHL, JODD, SHR
+from src.instructions import (
+    LOAD,
+    ADD,
+    SUB,
+    RESET,
+    JZERO,
+    JUMP,
+    DEC,
+    INC,
+    SHL,
+    JODD,
+    SHR,
+)
 from src.errors import Error
 from src.blocks.constant import Constant
+
 
 def operation_mapper(operation: str):
     mapper = {
@@ -8,9 +21,10 @@ def operation_mapper(operation: str):
         "-": Minus,
         "*": Multiply,
         "/": Divide,
-        "%": lambda x, y, lineno: Divide(x, y, lineno, modulo=True)
+        "%": lambda x, y, lineno: Divide(x, y, lineno, modulo=True),
     }
     return mapper[operation]
+
 
 class BinaryOperation:
     def __init__(self, x, y, lineno):
@@ -45,20 +59,22 @@ class BinaryOperation:
 
         return code
 
-class Plus(BinaryOperation):
 
+class Plus(BinaryOperation):
     def eval_num(self):
         return self.x.value + self.y.value
 
     def eval_mem(self, regx: str, regy: str):
         return [ADD(regx, regy)]
 
+
 class Minus(BinaryOperation):
     def eval_num(self):
-        return min(0, self.x.value - self.y.value)
+        return max(0, self.x.value - self.y.value)
 
     def eval_mem(self, regx: str, regy: str):
         return [SUB(regx, regy)]
+
 
 class Multiply(BinaryOperation):
     def eval_num(self):
@@ -69,7 +85,6 @@ class Multiply(BinaryOperation):
 
         code = [
             RESET(out),
-
             JZERO(regx, 7),
             JODD(regx, 2),
             JUMP(2),
@@ -77,15 +92,14 @@ class Multiply(BinaryOperation):
             SHR(regx),
             SHL(regy),
             JUMP(-6),
-
             RESET(regx),
-            ADD(regx, out)
+            ADD(regx, out),
         ]
 
         return code
 
-class Divide(BinaryOperation):
 
+class Divide(BinaryOperation):
     def __init__(self, x: int, y: int, lineno: int, modulo: bool = False):
         super().__init__(x, y, lineno)
         self.modulo = modulo
@@ -107,19 +121,15 @@ class Divide(BinaryOperation):
 
         code = [
             RESET(quotient),
-
             # Check if divisor is not 0
             JZERO(regy, 29),
-
             # Check if divisor bigger than divident - if so return
             RESET(condition),
             ADD(condition, regy),
             SUB(condition, regx),
             JZERO(condition, 2),
             JUMP(25),
-
             RESET(shifter),
-
             # Aligning left most bits
             RESET(condition),
             ADD(condition, regx),
@@ -128,11 +138,9 @@ class Divide(BinaryOperation):
             INC(shifter),
             SHL(regy),
             JUMP(-5),
-
             # Move once more for equal numbers handling
             SHL(regy),
             INC(shifter),
-
             # Division loop
             SHR(regy),
             DEC(shifter),
@@ -140,22 +148,18 @@ class Divide(BinaryOperation):
             ADD(condition, regy),
             SUB(condition, regx),
             JZERO(condition, 3),
-
             # If divisor is larger than divident
             SHL(quotient),
             JUMP(4),
-
             # Else if divident is larger or equal
             SUB(regx, regy),
             SHL(quotient),
             INC(quotient),
-
             # End loop when divident is back to its original form
             JZERO(shifter, 3),
             JUMP(-12),
-
             # If divisor is zero - reset divident
-            RESET(regx)
+            RESET(regx),
         ]
 
         if not self.modulo:
