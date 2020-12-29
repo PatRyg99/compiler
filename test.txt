@@ -1,20 +1,15 @@
 DECLARE 
-    n, p
+    n
 BEGIN
-    READ n;
+    n := 5;
 
-    REPEAT
-        p := n / 2;
-        p := 2 * p;
+    FOR i FROM 1 TO n DO
+        WRITE n;
+        n := n + 1;
+    ENDFOR
 
-        IF n > p THEN
-            WRITE 1;
-        ELSE
-            WRITE 0;
-        ENDIF
-
-        n := n / 2;
-    
-    UNTIL n = 0;
-
+    FOR i FROM n DOWNTO 1 DO
+        WRITE n;
+        n := n - 1;
+    ENDFOR
 END

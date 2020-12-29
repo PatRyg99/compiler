@@ -1,17 +1,22 @@
-from src.instructions import ADD, LOAD
+from src.instructions import ADD, LOAD, STORE, INC, DEC
 from src.blocks import Constant
 from src.errors import Error
 
+
 class VariableManager:
     """VariableManager of arrays and variables"""
+
     variables = {}
     arrays = {}
+    iterators = {}
     next_memory_block = 1
 
     @staticmethod
     def _check_redeclaration(name: str, lineno: int):
         """Check if variable hasn't been declared yet"""
-        declared = list(VariableManager.variables.keys()) + list(VariableManager.arrays.keys())
+        declared = list(VariableManager.variables.keys()) + list(
+            VariableManager.arrays.keys()
+        )
 
         if name in declared:
             Error.VariableRedeclaration.throw(lineno)
@@ -44,10 +49,19 @@ class VariableManager:
         VariableManager.next_memory_block += length
 
     @staticmethod
+    def declare_iterator(name: str):
+        """Iterator declaration"""
+        VariableManager.iterators[name] = Iterator(VariableManager.next_memory_block)
+        VariableManager.next_memory_block += 2
+
+    @staticmethod
     def get_var(name: str, lineno: int):
         """Getting variable by name"""
         try:
-            return VariableManager.variables[name]
+            if name in VariableManager.iterators.keys():
+                return VariableManager.iterators[name]
+            else:
+                return VariableManager.variables[name]
 
         except KeyError:
             if name not in VariableManager.arrays.keys():
@@ -67,6 +81,7 @@ class VariableManager:
             else:
                 Error.IndexedVariableNotArray(lineno)
 
+
 class Variable:
     def __init__(self, memory_block: int):
         self.memory_block = memory_block
@@ -76,6 +91,7 @@ class Variable:
         code.append(LOAD(reg, reg))
 
         return code
+
 
 class ArrayElement:
     def __init__(self, memory_block: int, range: tuple, idx):
@@ -104,6 +120,7 @@ class ArrayElement:
 
         return code
 
+
 class Array:
     def __init__(self, memory_block: int, range: tuple):
         self.memory_block = memory_block
@@ -111,3 +128,49 @@ class Array:
 
     def get(self, idx: int, lineno: int):
         return ArrayElement(self.memory_block, self.range, idx)
+
+
+class Iterator:
+    def __init__(self, memory_block: int):
+        self.memory_block = memory_block
+        self.regs = ["c"]
+
+    def allocate_start(self, reg: str):
+        code = Constant(self.memory_block).generate_code(self.regs[0])
+        code.append(STORE(reg, self.regs[0]))
+
+        return code
+
+    def allocate_end(self, reg: str):
+        code = Constant(self.memory_block + 1).generate_code(self.regs[0])
+        code.append(STORE(reg, self.regs[0]))
+
+        return code
+
+    def increment(self, reg: str):
+        regc = self.regs[0]
+
+        code = Constant(self.memory_block).generate_code(reg)
+        code += [LOAD(regc, reg), INC(regc), STORE(regc, reg)]
+
+        return code
+
+    def decrement(self, reg: str):
+        regc = self.regs[0]
+
+        code = Constant(self.memory_block).generate_code(reg)
+        code += [LOAD(regc, reg), DEC(regc), STORE(regc, reg)]
+
+        return code
+
+    def generate_end_code(self, reg: str):
+        code = Constant(self.memory_block + 1).generate_code(reg)
+        code.append(LOAD(reg, reg))
+
+        return code
+
+    def generate_code(self, reg: str):
+        code = Constant(self.memory_block).generate_code(reg)
+        code.append(LOAD(reg, reg))
+
+        return code

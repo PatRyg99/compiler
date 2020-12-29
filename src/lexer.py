@@ -65,6 +65,13 @@ class CompilerLexer(Lexer):
     ELSE = r"ELSE"
     THEN = r"THEN"
 
+    # For loop keywords
+    FOR = r"FOR"
+    FROM = r"FROM"
+    TO = r"TO"
+    DOWNTO = r"DOWNTO"
+    ENDFOR = r"ENDFOR"
+
     # While loop keywords
     WHILE = r"WHILE"
     DO = r"DO"
@@ -74,13 +81,6 @@ class CompilerLexer(Lexer):
     REPEAT = r"REPEAT"
     UNTIL = r"UNTIL"
     
-    # For loop keywords
-    FOR = r"FOR"
-    FROM = r"FROM"
-    TO = r"TO"
-    DOWNTO = r"DOWNTO"
-    ENDFOR = r"ENDFOR"
-
     # Program keywords
     DECLARE = r"DECLARE"
     BEGIN = r"BEGIN"

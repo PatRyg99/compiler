@@ -93,11 +93,11 @@ class CompilerParser(Parser):
     # For loop
     @_("FOR PIDENTIFIER FROM value TO value DO commands ENDFOR")
     def command(self, p):
-        return ForToLoop(p.PIDENTIFIER, p.value0, p.value1, p.commands)
+        return ForToLoop(p.PIDENTIFIER, p.value0, p.value1, p.commands, p.lineno)
 
     @_("FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR")
     def command(self, p):
-        return ForDownToLoop(p.PIDENTIFIER, p.value0, p.value1, p.commands)
+        return ForDownToLoop(p.PIDENTIFIER, p.value0, p.value1, p.commands, p.lineno)
 
     ################## EXPRESSIONS ####################
     @_("value")
