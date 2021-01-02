@@ -1,4 +1,5 @@
 from src.instructions import JZERO, JUMP
+from src.registers import RegisterManager
 
 
 class IfCondition:
@@ -7,13 +8,12 @@ class IfCondition:
         self.commands = commands
         self.lineno = lineno
 
-        self.regs = ["a"]
-
     def generate_code(self):
 
         # Generating condition evaluation to register regc
-        regc = self.regs[0]
+        regc = RegisterManager.get_register()
         cond_code = self.condition.generate_code(regc)
+        regc.unlock()
 
         # Generating code for if condition
         if_code = []
@@ -33,11 +33,10 @@ class IfElseCondition:
         self.else_commands = else_commands
         self.lineno = lineno
 
-        self.regs = ["a"]
-
     def generate_code(self):
-        regc = self.regs[0]
+        regc = RegisterManager.get_register()
         cond_code = self.condition.generate_code(regc)
+        regc.unlock()
 
         # Generating code for if condition
         if_code = []

@@ -1,5 +1,6 @@
 from src.instructions import STORE, PUT, RESET, GET
 from src.blocks import Constant
+from src.registers import RegisterManager
 
 
 class Write:
@@ -7,11 +8,9 @@ class Write:
         self.x = x
         self.lineno = lineno
 
-        self.regs = ["a", "b"]
-
     def generate_code(self):
-        mem = self.regs[0]
-        const = self.regs[1]
+        mem = RegisterManager.get_register()
+        const = RegisterManager.get_register()
 
         # Writing constant
         if isinstance(self.x, Constant):
@@ -25,6 +24,9 @@ class Write:
         # Write onto screen
         code.append(PUT(mem))
 
+        mem.unlock()
+        const.unlock()
+
         return code
 
 
@@ -33,13 +35,13 @@ class Read:
         self.x = x
         self.lineno = lineno
 
-        self.regs = ["a"]
-
     def generate_code(self):
-        mem = self.regs[0]
         self.x.initilized = True
 
+        mem = RegisterManager.get_register()
         code = self.x.generate_mem(mem, self.lineno)
         code.append(GET(mem))
+
+        mem.unlock()
 
         return code

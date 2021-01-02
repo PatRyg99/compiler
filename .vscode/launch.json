@@ -11,7 +11,7 @@
             "program": "main.py",
             "justMyCode": false,
             "args": [
-                "test/gotfryd/tab1.imp",
+                "test/gotfryd/nestedLoop2.imp",
                 "out.txt"
             ]
         },

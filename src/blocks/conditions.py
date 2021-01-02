@@ -1,5 +1,6 @@
 from src.errors import Error
 from src.blocks.constant import Constant
+from src.registers import RegisterManager
 from src.instructions import (
     LOAD,
     ADD,
@@ -33,17 +34,15 @@ class Condition:
         self.y = y
         self.lineno = lineno
 
-        self.regs = ["b", "c"]
-
     def eval_num(self):
         """Evaluate condition on constants"""
         raise NotImplementedError()
 
-    def eval_mem(self, regx: str, regy: str):
+    def eval_mem(self, regx, regy):
         """Evaluate condition on memory registers"""
         raise NotImplementedError()
 
-    def generate_code(self, regx: str):
+    def generate_code(self, regx):
 
         # If both values are numbers than evaluate condition and check whether
         # to perform condition of not
@@ -55,14 +54,19 @@ class Condition:
 
             return code
 
-        regy = self.regs[0]
-
+        # Generate code for x variable
         x_code = self.x.generate_code(regx, self.lineno)
+
+        # Generate code for y variable
+        regy = RegisterManager.get_register()
         y_code = self.y.generate_code(regy, self.lineno)
 
         # Generating code
         code = x_code + y_code
         code += self.eval_mem(regx, regy)
+
+        # Unlock y register
+        regy.unlock()
 
         return code
 
@@ -71,8 +75,8 @@ class Equals(Condition):
     def eval_num(self):
         return 1 if self.x.value == self.y.value else 0
 
-    def eval_mem(self, regx: str, regy: str):
-        regz = self.regs[1]
+    def eval_mem(self, regx, regy):
+        regz = RegisterManager.get_register()
 
         code = [
             # Copy x to z
@@ -97,6 +101,8 @@ class Equals(Condition):
             RESET(regx),
         ]
 
+        regz.unlock()
+
         return code
 
 
@@ -104,8 +110,8 @@ class NotEquals(Condition):
     def eval_num(self):
         return 0 if self.x.value == self.y.value else 1
 
-    def eval_mem(self, regx: str, regy: str):
-        regz = self.regs[1]
+    def eval_mem(self, regx, regy):
+        regz = RegisterManager.get_register()
 
         code = [
             # Copy x to z
@@ -130,6 +136,8 @@ class NotEquals(Condition):
             INC(regx),
         ]
 
+        regz.unlock()
+
         return code
 
 
@@ -137,7 +145,7 @@ class Lesser(Condition):
     def eval_num(self):
         return 1 if self.x.value < self.y.value else 0
 
-    def eval_mem(self, regx: str, regy: str):
+    def eval_mem(self, regx, regy):
         code = [
             # Perform substraction and check if no 0
             SUB(regy, regx),
@@ -157,7 +165,7 @@ class Greater(Condition):
     def eval_num(self):
         return 1 if self.x.value > self.y.value else 0
 
-    def eval_mem(self, regx: str, regy: str):
+    def eval_mem(self, regx, regy):
         code = [
             # Perform substraction and check if no 0
             SUB(regx, regy),
@@ -177,7 +185,7 @@ class LEQ(Lesser):
     def eval_num(self):
         return 1 if self.x.value <= self.y.value else 0
 
-    def eval_mem(self, regx: str, regy: str):
+    def eval_mem(self, regx, regy):
 
         # x <= y <=> x < y + 1
         code = [INC(regy)]
@@ -190,7 +198,7 @@ class GEQ(Greater):
     def eval_num(self):
         return 1 if self.x.value >= self.y.value else 0
 
-    def eval_mem(self, regx: str, regy: str):
+    def eval_mem(self, regx, regy):
 
         # x >= y <=> x + 1 > y
         code = [INC(regx)]

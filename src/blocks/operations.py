@@ -13,6 +13,7 @@ from src.instructions import (
 )
 from src.errors import Error
 from src.blocks.constant import Constant
+from src.registers import RegisterManager
 
 
 def operation_mapper(operation: str):
@@ -32,30 +33,30 @@ class BinaryOperation:
         self.y = y
         self.lineno = lineno
 
-        self.regs = ["b", "c", "d", "e"]
-
     def eval_num(self):
         """Evaluate operation on constants"""
         raise NotImplementedError()
 
-    def eval_mem(self, regx: str, regy: str):
+    def eval_mem(self, regx, regy):
         """Evaluate operation on memory registers"""
         raise NotImplementedError()
 
-    def generate_code(self, regx: str, lineno: str = None):
-
-        regy = self.regs[0]
+    def generate_code(self, regx, lineno: str = None):
 
         # If both values are numbers than evaluate constant
         if isinstance(self.x, Constant) and isinstance(self.y, Constant):
             return Constant(self.eval_num()).generate_code(regx)
 
         x_code = self.x.generate_code(regx, self.lineno)
+
+        regy = RegisterManager.get_register()
         y_code = self.y.generate_code(regy, self.lineno)
 
         # Generating code
         code = x_code + y_code
         code += self.eval_mem(regx, regy)
+
+        regy.unlock()
 
         return code
 
@@ -64,7 +65,7 @@ class Plus(BinaryOperation):
     def eval_num(self):
         return self.x.value + self.y.value
 
-    def eval_mem(self, regx: str, regy: str):
+    def eval_mem(self, regx, regy):
         return [ADD(regx, regy)]
 
 
@@ -72,7 +73,7 @@ class Minus(BinaryOperation):
     def eval_num(self):
         return max(0, self.x.value - self.y.value)
 
-    def eval_mem(self, regx: str, regy: str):
+    def eval_mem(self, regx, regy):
         return [SUB(regx, regy)]
 
 
@@ -80,8 +81,8 @@ class Multiply(BinaryOperation):
     def eval_num(self):
         return self.x.value * self.y.value
 
-    def eval_mem(self, regx: str, regy: str):
-        out = self.regs[1]
+    def eval_mem(self, regx, regy):
+        out = RegisterManager.get_register()
 
         code = [
             RESET(out),
@@ -95,6 +96,8 @@ class Multiply(BinaryOperation):
             RESET(regx),
             ADD(regx, out),
         ]
+
+        out.unlock()
 
         return code
 
@@ -113,11 +116,11 @@ class Divide(BinaryOperation):
         else:
             return self.x.value // self.y.value
 
-    def eval_mem(self, regx: str, regy: str):
+    def eval_mem(self, regx, regy):
 
-        quotient = self.regs[1]
-        condition = self.regs[2]
-        shifter = self.regs[3]
+        quotient = RegisterManager.get_register()
+        condition = RegisterManager.get_register()
+        shifter = RegisterManager.get_register()
 
         code = [
             RESET(quotient),
@@ -164,5 +167,9 @@ class Divide(BinaryOperation):
 
         if not self.modulo:
             code += [RESET(regx), ADD(regx, quotient)]
+
+        quotient.unlock()
+        condition.unlock()
+        shifter.unlock()
 
         return code
