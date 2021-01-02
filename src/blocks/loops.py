@@ -66,25 +66,23 @@ class IteratorLoop:
 
         reg = self.regs[0]
 
-        # Allocate iterator with constant range
-        VariableManager.declare_iterator(self.iter_name)
-
         # Compute starting value
         if isinstance(self.start, Constant):
             start_code = self.start.generate_code(reg)
         else:
-            start_code = self.start.generate_mem(reg)
+            start_code = self.start.generate_mem(reg, self.lineno)
             start_code.append(LOAD(reg, reg))
-
-        start_code += VariableManager.iterators[self.iter_name].allocate_start(reg)
 
         # Compute ending value
         if isinstance(self.end, Constant):
             end_code = self.end.generate_code(reg)
         else:
-            end_code = self.end.generate_mem(reg)
+            end_code = self.end.generate_mem(reg, self.lineno)
             end_code.append(LOAD(reg, reg))
 
+        # Allocate iterator with constant range
+        VariableManager.declare_iterator(self.iter_name)
+        start_code += VariableManager.iterators[self.iter_name].allocate_start(reg)
         end_code += VariableManager.iterators[self.iter_name].allocate_end(reg)
 
         return start_code + end_code
@@ -108,7 +106,7 @@ class ForToLoop(IteratorLoop):
         iter_reg = self.regs[0]
         cond_reg = self.regs[1]
 
-        cond_code = iterator.generate_code(iter_reg)
+        cond_code = iterator.generate_code(iter_reg, self.lineno)
         cond_code += iterator.generate_end_code(cond_reg)
 
         cond_code += [
@@ -147,7 +145,7 @@ class ForDownToLoop(IteratorLoop):
         iter_reg = self.regs[0]
         cond_reg = self.regs[1]
 
-        cond_code = iterator.generate_code(iter_reg)
+        cond_code = iterator.generate_code(iter_reg, self.lineno)
         cond_code += iterator.generate_end_code(cond_reg)
         cond_code += [
             # Check GEQ

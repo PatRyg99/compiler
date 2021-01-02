@@ -11,7 +11,7 @@
             "program": "main.py",
             "justMyCode": false,
             "args": [
-                "test.txt",
+                "test/gotfryd/tab1.imp",
                 "out.txt"
             ]
         },

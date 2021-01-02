@@ -27,7 +27,7 @@ class VariableManager:
         length = range[1] - range[0] + 1
 
         if length <= 0:
-            Error.ArrayInvalidRange(lineno)
+            Error.ArrayInvalidRange.throw(lineno)
 
         return length
 
@@ -79,18 +79,22 @@ class VariableManager:
             if name not in VariableManager.variables.keys():
                 Error.VariableNotDeclared.throw(lineno)
             else:
-                Error.IndexedVariableNotArray(lineno)
+                Error.IndexedVariableNotArray.throw(lineno)
 
 
 class Variable:
     def __init__(self, memory_block: int):
         self.memory_block = memory_block
+        self.initilized = False
 
-    def generate_mem(self, reg: str):
-        return Constant(self.memory_block).generate_code(reg)
+    def generate_mem(self, reg: str, lineno: int):
+        if self.initilized:
+            return Constant(self.memory_block).generate_code(reg)
+        else:
+            Error.VariableNotInitialized.throw(lineno)
 
-    def generate_code(self, reg: str):
-        code = self.generate_mem(reg)
+    def generate_code(self, reg: str, lineno: int):
+        code = self.generate_mem(reg, lineno)
         code.append(LOAD(reg, reg))
 
         return code
@@ -101,10 +105,11 @@ class ArrayElement:
         self.memory_block = memory_block
         self.range = range
         self.idx = idx
+        self.initilized = True
 
         self.regs = ["c"]
 
-    def generate_mem(self, reg: str):
+    def generate_mem(self, reg: str, lineno: int):
 
         # If index is a number - perform variable load
         if isinstance(self.idx, int):
@@ -116,15 +121,15 @@ class ArrayElement:
             regv = self.regs[0]
 
             code = Constant(self.memory_block - self.range[0]).generate_code(reg)
-            code += self.idx.generate_code(regv)
+            code += self.idx.generate_code(regv, lineno)
 
             code += [ADD(reg, regv)]
 
         return code
 
-    def generate_code(self, reg: str):
+    def generate_code(self, reg: str, lineno: int):
 
-        code = self.generate_mem(reg)
+        code = self.generate_mem(reg, lineno)
         code.append(LOAD(reg, reg))
 
         return code
@@ -150,16 +155,17 @@ class UndeclaredIterator:
         else:
             Error.VariableNotDeclared.throw(self.lineno)
 
-    def generate_mem(self, reg: str):
-        return self.declare().generate_mem(reg)
+    def generate_mem(self, reg: str, lineno: int):
+        return self.declare().generate_mem(reg, lineno)
 
-    def generate_code(self, reg: str):
-        return self.declare().generate_code(reg)
+    def generate_code(self, reg: str, lineno: int):
+        return self.declare().generate_code(reg, lineno)
 
 
 class Iterator:
     def __init__(self, memory_block: int):
         self.memory_block = memory_block
+        self.initilized = True
         self.regs = ["c"]
 
     def allocate_start(self, reg: str):
@@ -196,11 +202,11 @@ class Iterator:
 
         return code
 
-    def generate_mem(self, reg: str):
+    def generate_mem(self, reg: str, lineno: int):
         return Constant(self.memory_block).generate_code(reg)
 
-    def generate_code(self, reg: str):
-        code = self.generate_mem(reg)
+    def generate_code(self, reg: str, lineno: int):
+        code = self.generate_mem(reg, lineno)
         code.append(LOAD(reg, reg))
 
         return code

@@ -1,10 +1,11 @@
 from src.instructions import RESET, SHL, INC
 
+
 class Constant:
     def __init__(self, value: int):
         self.value = value
 
-    def generate_code(self, reg: str):
+    def generate_code(self, reg: str, lineno: int = None):
 
         # Reset operational register
         code = [RESET(reg)]

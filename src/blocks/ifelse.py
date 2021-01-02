@@ -1,5 +1,6 @@
 from src.instructions import JZERO, JUMP
 
+
 class IfCondition:
     def __init__(self, condition, commands, lineno):
         self.condition = condition
@@ -23,6 +24,7 @@ class IfCondition:
         cond_code += [JZERO(regc, len(if_code) + 1)]
 
         return cond_code + if_code
+
 
 class IfElseCondition:
     def __init__(self, condition, if_commands, else_commands, lineno):

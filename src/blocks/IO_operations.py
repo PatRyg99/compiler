@@ -15,12 +15,12 @@ class Write:
 
         # Writing constant
         if isinstance(self.x, Constant):
-            code = self.x.generate_code(const)
+            code = self.x.generate_code(const, self.lineno)
             code += [RESET(mem), STORE(const, mem)]
 
         # Writing variable
         else:
-            code = self.x.generate_mem(mem)
+            code = self.x.generate_mem(mem, self.lineno)
 
         # Write onto screen
         code.append(PUT(mem))
@@ -37,7 +37,9 @@ class Read:
 
     def generate_code(self):
         mem = self.regs[0]
-        code = self.x.generate_mem(mem)
+        self.x.initilized = True
+
+        code = self.x.generate_mem(mem, self.lineno)
         code.append(GET(mem))
 
         return code

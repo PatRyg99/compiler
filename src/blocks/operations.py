@@ -42,7 +42,7 @@ class BinaryOperation:
         """Evaluate operation on memory registers"""
         raise NotImplementedError()
 
-    def generate_code(self, regx: str):
+    def generate_code(self, regx: str, lineno: str = None):
 
         regy = self.regs[0]
 
@@ -50,8 +50,8 @@ class BinaryOperation:
         if isinstance(self.x, Constant) and isinstance(self.y, Constant):
             return Constant(self.eval_num()).generate_code(regx)
 
-        x_code = self.x.generate_code(regx)
-        y_code = self.y.generate_code(regy)
+        x_code = self.x.generate_code(regx, self.lineno)
+        y_code = self.y.generate_code(regy, self.lineno)
 
         # Generating code
         code = x_code + y_code

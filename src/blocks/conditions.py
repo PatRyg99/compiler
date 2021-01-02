@@ -57,8 +57,8 @@ class Condition:
 
         regy = self.regs[0]
 
-        x_code = self.x.generate_code(regx)
-        y_code = self.y.generate_code(regy)
+        x_code = self.x.generate_code(regx, self.lineno)
+        y_code = self.y.generate_code(regy, self.lineno)
 
         # Generating code
         code = x_code + y_code

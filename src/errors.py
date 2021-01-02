@@ -9,6 +9,8 @@ class Error(Enum):
     ArrayNotIndexed = 4
     VariableNotDeclared = 5
     IndexedVariableNotArray = 6
+    VariableNotInitialized = 7
+    IteratorModification = 8
 
     def throw(self, lineno: int):
         print(f"[Line {lineno}] Error: {self.name}")
