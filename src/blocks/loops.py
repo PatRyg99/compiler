@@ -125,11 +125,10 @@ class ForToLoop(IteratorLoop):
             loop_code += command.generate_code()
 
         # Perform increment
-        iter_reg = RegisterManager.get_register()
-        cond_reg = RegisterManager.get_register()
+        inc_reg = RegisterManager.get_register()
 
         # Increment iter and jump
-        inc_code = iterator.increment(iter_reg)
+        inc_code = iterator.increment(inc_reg)
         inc_code += [JUMP(-(len(cond_code) + len(loop_code) + len(inc_code) + 1))]
 
         # Add jump to condition
@@ -139,7 +138,6 @@ class ForToLoop(IteratorLoop):
         self.undeclare_iter()
 
         iter_reg.unlock()
-        cond_reg.unlock()
 
         return iter_code + cond_code + loop_code + inc_code
 
@@ -164,17 +162,19 @@ class ForDownToLoop(IteratorLoop):
             SUB(iter_reg, cond_reg),
         ]
 
+        iter_reg.unlock()
+        cond_reg.unlock()
+
         # Generating code for loop
         loop_code = []
         for command in reversed(self.commands):
             loop_code += command.generate_code()
 
         # Perform decrement
-        iter_reg = RegisterManager.get_register()
-        cond_reg = RegisterManager.get_register()
+        dec_reg = RegisterManager.get_register()
 
         # Decrement iter and jump
-        dec_code = iterator.decrement(iter_reg)
+        dec_code = iterator.decrement(dec_reg)
         dec_code += [JUMP(-(len(cond_code) + len(loop_code) + len(dec_code) + 1))]
 
         # Add jump to condition
@@ -183,7 +183,6 @@ class ForDownToLoop(IteratorLoop):
         # Undeclare iterator
         self.undeclare_iter()
 
-        iter_reg.unlock()
-        cond_reg.unlock()
+        dec_reg.unlock()
 
         return iter_code + cond_code + loop_code + dec_code
