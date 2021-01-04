@@ -28,11 +28,11 @@ class CompilerParser(Parser):
     ################# PROGRAM ###################
     @_("BEGIN commands END")
     def program(self, p):
-        return Program(reversed(p.commands))
+        return Program(p.commands)
 
     @_("DECLARE declarations BEGIN commands END")
     def program(self, p):
-        return Program(reversed(p.commands))
+        return Program(p.commands)
 
     ################ DECLARTIONS ###############
     @_("declarations COMMA PIDENTIFIER", "PIDENTIFIER")
@@ -49,7 +49,7 @@ class CompilerParser(Parser):
     ############### COMMANDS ################
     @_("commands command")
     def commands(self, p):
-        return [p.command] + p.commands
+        return p.commands + [p.command]
 
     @_("command")
     def commands(self, p):

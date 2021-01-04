@@ -11,6 +11,7 @@ from src.instructions import (
     JODD,
     SHR,
 )
+from src.blocks import Block
 from src.errors import Error
 from src.blocks.constant import Constant
 from src.registers import RegisterManager
@@ -27,8 +28,10 @@ def operation_mapper(operation: str):
     return mapper[operation]
 
 
-class BinaryOperation:
+class BinaryOperation(Block):
     def __init__(self, x, y, lineno):
+        super().__init__()
+
         self.x = x
         self.y = y
         self.lineno = lineno

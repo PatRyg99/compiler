@@ -6,7 +6,8 @@ class Program:
         code = []
 
         for block in self.blocks:
-            block_code = block.generate_code()
-            code += block_code
+            if block.generate:
+                block_code = block.generate_code()
+                code += block_code
 
         return code

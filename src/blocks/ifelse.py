@@ -1,9 +1,12 @@
+from src.blocks import Block
 from src.instructions import JZERO, JUMP
 from src.registers import RegisterManager
 
 
-class IfCondition:
+class IfCondition(Block):
     def __init__(self, condition, commands, lineno):
+        super().__init__()
+
         self.condition = condition
         self.commands = commands
         self.lineno = lineno
@@ -17,8 +20,13 @@ class IfCondition:
 
         # Generating code for if condition
         if_code = []
-        for command in reversed(self.commands):
-            if_code += command.generate_code()
+        for command in self.commands:
+            if command.generate:
+                if_code += command.generate_code()
+
+        # If no if code inside - omit if generation
+        if not if_code:
+            return []
 
         # Performing jump based on regc
         cond_code += [JZERO(regc, len(if_code) + 1)]
@@ -26,8 +34,10 @@ class IfCondition:
         return cond_code + if_code
 
 
-class IfElseCondition:
+class IfElseCondition(Block):
     def __init__(self, condition, if_commands, else_commands, lineno):
+        super().__init__()
+
         self.condition = condition
         self.if_commands = if_commands
         self.else_commands = else_commands
@@ -40,13 +50,19 @@ class IfElseCondition:
 
         # Generating code for if condition
         if_code = []
-        for command in reversed(self.if_commands):
-            if_code += command.generate_code()
+        for command in self.if_commands:
+            if command.generate:
+                if_code += command.generate_code()
 
         # Generating code for else condition
         else_code = []
-        for command in reversed(self.else_commands):
-            else_code += command.generate_code()
+        for command in self.else_commands:
+            if command.generate:
+                else_code += command.generate_code()
+
+        # If no if and else code inside - omit ifelse generation
+        if not if_code and not else_code:
+            return []
 
         # Omitting else if condition is true
         if_code += [JUMP(len(else_code) + 1)]

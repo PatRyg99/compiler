@@ -1,8 +1,11 @@
+from src.blocks import Block
 from src.instructions import RESET, SHL, INC
 
 
-class Constant:
+class Constant(Block):
     def __init__(self, value: int):
+        super().__init__()
+
         self.value = value
 
     def generate_code(self, reg, lineno: int = None):

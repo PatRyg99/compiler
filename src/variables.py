@@ -37,7 +37,9 @@ class VariableManager:
         """Variable declaration with name check"""
         VariableManager._check_redeclaration(name, lineno)
 
-        VariableManager.variables[name] = Variable(VariableManager.next_memory_block)
+        VariableManager.variables[name] = Variable(
+            name, VariableManager.next_memory_block
+        )
         VariableManager.next_memory_block += 1
 
     @staticmethod
@@ -46,7 +48,9 @@ class VariableManager:
         VariableManager._check_redeclaration(name, lineno)
         length = VariableManager._compute_length(name, range, lineno)
 
-        VariableManager.arrays[name] = Array(VariableManager.next_memory_block, range)
+        VariableManager.arrays[name] = Array(
+            name, VariableManager.next_memory_block, range
+        )
         VariableManager.next_memory_block += length
 
     @staticmethod
@@ -84,7 +88,8 @@ class VariableManager:
 
 
 class Variable:
-    def __init__(self, memory_block: int):
+    def __init__(self, name: str, memory_block: int):
+        self.name = name
         self.memory_block = memory_block
         self.initilized = False
 
@@ -102,7 +107,8 @@ class Variable:
 
 
 class ArrayElement:
-    def __init__(self, memory_block: int, range: tuple, idx):
+    def __init__(self, name: str, memory_block: int, range: tuple, idx):
+        self.name = name
         self.memory_block = memory_block
         self.range = range
         self.idx = idx
@@ -137,12 +143,13 @@ class ArrayElement:
 
 
 class Array:
-    def __init__(self, memory_block: int, range: tuple):
+    def __init__(self, name: str, memory_block: int, range: tuple):
+        self.name = name
         self.memory_block = memory_block
         self.range = range
 
     def get(self, idx: int, lineno: int):
-        return ArrayElement(self.memory_block, self.range, idx)
+        return ArrayElement(self.name, self.memory_block, self.range, idx)
 
 
 class UndeclaredIterator:

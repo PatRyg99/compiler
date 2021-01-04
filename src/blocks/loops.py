@@ -1,11 +1,14 @@
+from src.blocks import Block
 from src.instructions import JZERO, JUMP, RESET, ADD, LOAD, INC, DEC, SUB
 from src.blocks import Constant
 from src.blocks.conditions import LEQ, GEQ
 from src.registers import RegisterManager
 
 
-class ConditionLoop:
+class ConditionLoop(Block):
     def __init__(self, condition, commands, lineno):
+        super().__init__()
+
         self.condition = condition
         self.commands = commands
         self.lineno = lineno
@@ -21,8 +24,13 @@ class WhileLoop(ConditionLoop):
 
         # Generating code for loop
         loop_code = []
-        for command in reversed(self.commands):
-            loop_code += command.generate_code()
+        for command in self.commands:
+            if command.generate:
+                loop_code += command.generate_code()
+
+        # If no loop code inside - omit loop generation
+        if not loop_code:
+            return []
 
         # Adding jump to loop code
         loop_code += [JUMP(-(len(loop_code) + len(cond_code) + 1))]
@@ -43,8 +51,13 @@ class RepeatUntilLoop(ConditionLoop):
 
         # Generating code for loop
         loop_code = []
-        for command in reversed(self.commands):
-            loop_code += command.generate_code()
+        for command in self.commands:
+            if command.generate:
+                loop_code += command.generate_code()
+
+        # If no loop code inside - omit loop generation
+        if not loop_code:
+            return []
 
         # Performing jump based on regc
         cond_code += [JZERO(regc, -(len(loop_code) + len(cond_code)))]
@@ -52,8 +65,10 @@ class RepeatUntilLoop(ConditionLoop):
         return loop_code + cond_code
 
 
-class IteratorLoop:
+class IteratorLoop(Block):
     def __init__(self, iter_name, start, end, commands, lineno):
+        super().__init__()
+
         self.iter_name = iter_name
         self.start = start
         self.end = end
@@ -121,8 +136,13 @@ class ForToLoop(IteratorLoop):
 
         # Generating code for loop
         loop_code = []
-        for command in reversed(self.commands):
-            loop_code += command.generate_code()
+        for command in self.commands:
+            if command.generate:
+                loop_code += command.generate_code()
+
+        # If no loop code inside - omit loop generation
+        if not loop_code:
+            return []
 
         # Perform increment
         inc_reg = RegisterManager.get_register()
@@ -167,8 +187,13 @@ class ForDownToLoop(IteratorLoop):
 
         # Generating code for loop
         loop_code = []
-        for command in reversed(self.commands):
-            loop_code += command.generate_code()
+        for command in self.commands:
+            if command.generate:
+                loop_code += command.generate_code()
+
+        # If no loop code inside - omit loop generation
+        if not loop_code:
+            return []
 
         # Perform decrement
         dec_reg = RegisterManager.get_register()

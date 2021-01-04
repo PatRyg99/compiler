@@ -2,10 +2,13 @@ from src.instructions import STORE
 from src.blocks.constant import Constant
 from src.errors import Error
 from src.registers import RegisterManager
+from src.blocks import Block
 
 
-class Assignment:
+class Assignment(Block):
     def __init__(self, var, expression, lineno):
+        super().__init__()
+
         self.var = var
         self.expression = expression
         self.lineno = lineno

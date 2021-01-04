@@ -1,10 +1,13 @@
+from src.blocks import Block
 from src.instructions import STORE, PUT, RESET, GET
 from src.blocks import Constant
 from src.registers import RegisterManager
 
 
-class Write:
+class Write(Block):
     def __init__(self, x, lineno):
+        super().__init__()
+
         self.x = x
         self.lineno = lineno
 
@@ -30,8 +33,10 @@ class Write:
         return code
 
 
-class Read:
+class Read(Block):
     def __init__(self, x, lineno):
+        super().__init__()
+
         self.x = x
         self.lineno = lineno
 

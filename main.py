@@ -3,6 +3,7 @@ from src.lexer import CompilerLexer
 from src.parser import CompilerParser
 from src.variables import VariableManager
 from src.program import Program
+from src.static_analysis import StaticAnalyser
 
 
 def main(in_file: str, out_file: str):
@@ -15,6 +16,8 @@ def main(in_file: str, out_file: str):
 
     tokens = lexer.tokenize(data)
     program = parser.parse(tokens)
+
+    # program = StaticAnalyser().run(program)
 
     if program is not None:
         code = program.generate_code()
