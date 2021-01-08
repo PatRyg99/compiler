@@ -1,5 +1,3 @@
-from typing import Union
-
 from src.blocks import (
     Assignment,
     Constant,
@@ -134,14 +132,10 @@ class StaticAnalyser:
                 if block.var.name not in self.variables:
                     block.generate = False
 
-                    if not block.generate:
-                        print("Removed block in line: ", block.lineno)
-
     def run(self, program):
 
         # Scan code for required variables
         self.scan_variables(program)
-        print(self.variables)
 
         # Remove blocks with no required variables
         self.remove_blocks(program)

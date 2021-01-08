@@ -15,27 +15,5 @@
                 "out.txt"
             ]
         },
-        {
-            "name": "Compiler (arithmetic test)",
-            "type": "python",
-            "request": "launch",
-            "program": "main.py",
-            "justMyCode": false,
-            "args": [
-                "arithmetic_test.txt",
-                "out.txt"
-            ]
-        },
-        {
-            "name": "Compiler (condition test)",
-            "type": "python",
-            "request": "launch",
-            "program": "main.py",
-            "justMyCode": false,
-            "args": [
-                "condition_test.txt",
-                "out.txt"
-            ]
-        }
     ]
 }
