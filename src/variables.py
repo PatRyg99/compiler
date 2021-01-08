@@ -56,7 +56,9 @@ class VariableManager:
     @staticmethod
     def declare_iterator(name: str):
         """Iterator declaration"""
-        VariableManager.iterators[name] = Iterator(VariableManager.next_memory_block)
+        VariableManager.iterators[name] = Iterator(
+            name, VariableManager.next_memory_block
+        )
         VariableManager.next_memory_block += 2
 
     @staticmethod
@@ -171,7 +173,8 @@ class UndeclaredIterator:
 
 
 class Iterator:
-    def __init__(self, memory_block: int):
+    def __init__(self, name: str, memory_block: int):
+        self.name = name
         self.memory_block = memory_block
         self.initilized = True
 
@@ -195,23 +198,27 @@ class Iterator:
 
         return code
 
-    def increment(self, reg: str):
+    def increment(self):
+        inc_reg = RegisterManager.get_register()
         regc = RegisterManager.get_register()
 
-        code = Constant(self.memory_block).generate_code(reg)
-        code += [LOAD(regc, reg), INC(regc), STORE(regc, reg)]
+        code = Constant(self.memory_block).generate_code(inc_reg)
+        code += [LOAD(regc, inc_reg), INC(regc), STORE(regc, inc_reg)]
 
         regc.unlock()
+        inc_reg.unlock()
 
         return code
 
-    def decrement(self, reg):
+    def decrement(self):
+        dec_reg = RegisterManager.get_register()
         regc = RegisterManager.get_register()
 
-        code = Constant(self.memory_block).generate_code(reg)
-        code += [LOAD(regc, reg), JZERO(regc, 4), DEC(regc), STORE(regc, reg)]
+        code = Constant(self.memory_block).generate_code(dec_reg)
+        code += [LOAD(regc, dec_reg), JZERO(regc, 4), DEC(regc), STORE(regc, dec_reg)]
 
         regc.unlock()
+        dec_reg.unlock()
 
         return code
 
@@ -227,5 +234,11 @@ class Iterator:
     def generate_code(self, reg, lineno: int):
         code = self.generate_mem(reg, lineno)
         code.append(LOAD(reg, reg))
+
+        return code
+
+    def generate_both(self, reg, reg_end, lineno: int):
+        code = self.generate_mem(reg_end, lineno)
+        code += [LOAD(reg, reg_end), INC(reg_end), LOAD(reg_end, reg_end)]
 
         return code

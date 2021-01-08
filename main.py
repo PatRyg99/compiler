@@ -17,7 +17,7 @@ def main(in_file: str, out_file: str):
     tokens = lexer.tokenize(data)
     program = parser.parse(tokens)
 
-    # program = StaticAnalyser().run(program)
+    program = StaticAnalyser().run(program)
 
     if program is not None:
         code = program.generate_code()

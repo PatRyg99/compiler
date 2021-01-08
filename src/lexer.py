@@ -25,7 +25,9 @@ class CompilerLexer(Lexer):
     ignore_blank = r"[ \t]"
 
     # Ignore comment
-    ignore_comment = r"\[(.|\n)*?\]"
+    @_(r"\[(.|\n)*?\]")
+    def ignore_comment(self, t):
+        self.lineno += t.value.count("\n")
 
     # Ignore newline
     @_(r'\n')

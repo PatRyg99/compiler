@@ -28,85 +28,122 @@ class StaticAnalyser:
     def is_iter_loop(self, block):
         return isinstance(block, ForToLoop) or isinstance(block, ForDownToLoop)
 
-    def run(self, program):
+    def add_variable(self, var):
+        """Add variable to required"""
+        if not isinstance(var, Constant):
+            self.variables.add(var.name)
 
+            if isinstance(var, ArrayElement):
+                if isinstance(var.idx, Variable) or isinstance(
+                    var.idx, UndeclaredIterator
+                ):
+                    self.variables.add(var.idx.name)
+
+    def scan_variables(self, program):
+        """Scan code for variables that are required"""
         if not isinstance(program, list):
             blocks = program.blocks
         else:
             blocks = program
 
         for block in reversed(blocks):
+
+            # Write block
             if isinstance(block, Write):
-                if not isinstance(block.x, Constant):
-                    self.variables.add(block.x.name)
+                self.add_variable(block.x)
 
-                    if isinstance(block.x, ArrayElement):
-                        if isinstance(block.x.idx, ArrayElement) or isinstance(
-                            block.x.idx, UndeclaredIterator
-                        ):
-                            self.variables.add(block.x.idx.name)
-
+            # Iterator loop block
             elif self.is_iter_loop(block):
-                # self.run(block.commands, delete=False)
+                self.scan_variables(block.commands)
+                self.add_variable(block.start)
+                self.add_variable(block.end)
 
-                if not isinstance(block.start, Constant):
-                    self.variables.add(block.start.name)
-
-                if not isinstance(block.end, Constant):
-                    self.variables.add(block.end.name)
-
+            # Condition loop block
             elif self.is_cond_loop(block):
-                # self.run(block.commands, delete=False)
-                cond = block.condition
+                self.scan_variables(block.commands)
+                self.add_variable(block.condition.x)
+                self.add_variable(block.condition.y)
 
-                if not isinstance(cond.x, Constant):
-                    self.variables.add(cond.x.name)
-
-                if not isinstance(cond.y, Constant):
-                    self.variables.add(cond.y.name)
-
+            # If block
             elif isinstance(block, IfCondition):
-                self.run(block.commands)
-                cond = block.condition
+                self.scan_variables(block.commands)
+                self.add_variable(block.condition.x)
+                self.add_variable(block.condition.y)
 
-                if not isinstance(cond.x, Constant):
-                    self.variables.add(cond.x.name)
-
-                if not isinstance(cond.y, Constant):
-                    self.variables.add(cond.y.name)
-
+            # Else if block
             elif isinstance(block, IfElseCondition):
-                self.run(block.if_commands)
-                self.run(block.else_commands)
+                self.scan_variables(block.if_commands)
+                self.scan_variables(block.else_commands)
+                self.add_variable(block.condition.x)
+                self.add_variable(block.condition.y)
 
-                cond = block.condition
-
-                if not isinstance(cond.x, Constant):
-                    self.variables.add(cond.x.name)
-
-                if not isinstance(cond.y, Constant):
-                    self.variables.add(cond.y.name)
-
-            # Check if block is assignment
+            # Assignment block
             elif isinstance(block, Assignment):
 
                 # If required variable is being assigned
                 # Add all expression variables to required
                 if block.var.name in self.variables:
+                    self.add_variable(block.var)
                     expr = block.expression
 
                     if isinstance(expr, BinaryOperation):
-                        if not isinstance(expr.x, Constant):
-                            self.variables.add(expr.x.name)
+                        self.add_variable(expr.x)
+                        self.add_variable(expr.y)
 
-                        if not isinstance(expr.y, Constant):
-                            self.variables.add(expr.y.name)
+                    else:
+                        self.add_variable(expr)
 
-                    elif not isinstance(expr, Constant):
-                        self.variables.add(expr.name)
+    def check_variable(self, var):
+        """Check if block has required variable"""
+        if not isinstance(var, Constant):
+            if isinstance(var, ArrayElement):
+                if isinstance(var.idx, ArrayElement) or isinstance(
+                    var.idx, UndeclaredIterator
+                ):
+                    return var.name in self.variables or var.idx.name in self.variables
 
-                # Otherwise set block to not be generated
-                else:
+            return var.name in self.variables
+
+        return False
+
+    def remove_blocks(self, program):
+        """Removing blocks from code that do not have required variables"""
+        if not isinstance(program, list):
+            blocks = program.blocks
+        else:
+            blocks = program
+
+        for block in blocks:
+
+            # Loop block
+            if self.is_iter_loop(block) or self.is_cond_loop(block):
+                self.remove_blocks(block.commands)
+
+            # If block
+            elif isinstance(block, IfCondition):
+                self.remove_blocks(block.commands)
+
+            # Else if block
+            elif isinstance(block, IfElseCondition):
+                self.remove_blocks(block.if_commands)
+                self.remove_blocks(block.else_commands)
+
+            # Assignment block
+            elif isinstance(block, Assignment):
+
+                if block.var.name not in self.variables:
                     block.generate = False
+
+                    if not block.generate:
+                        print("Removed block in line: ", block.lineno)
+
+    def run(self, program):
+
+        # Scan code for required variables
+        self.scan_variables(program)
+        print(self.variables)
+
+        # Remove blocks with no required variables
+        self.remove_blocks(program)
 
         return program

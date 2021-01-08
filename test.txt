@@ -1,43 +1,40 @@
-[ sort.imp 
+[ tab1.imp - tablice 
 
-5 2 10 4 20 8 17 16 11 9 22 18 21 13 19 3 15 6 7 12 14 1 1234567890 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22
+    0 23 44 63 80 95 108 119 128 135 140 143 144 143 140 135 128 119 108 95 80 63 44 23 0
 ]
 DECLARE
-	x, q, w, j, k, n, m, tab(1:22)
+	n, _r, r_, j, k, d, c, ta(0:24), tb(100:124), tc(999900:999924)
 BEGIN
-	n := 23;
-	m := n - 1;
-	q := 5;
-	w := 1;
-	[generowanie nieposortowanej tablicy]
-	FOR i FROM 1 TO m DO
-		w := w * q;
-		w := w % n;
-		tab(i) := w;
+	n := 25 - 1;
+	c := n * 5; [ c = 120 ]
+	c := 5 + c; [ c = 125 ]
+	c := c - 1; [ c = 124 ]
+	n := 25 - 1;        [       n = 24     ]
+    _r := n + 999876;   [      _r = 999900 ]
+    r_ := _r + n;       [      r_ = 999924 ]
+	tc(_r) := n;        [  tc(_r) = 24     ]
+	tc(r_) := n - n;    [  tc(r_) = 0   ] 
+
+    FOR i FROM tc(_r) DOWNTO tc(r_) DO  [ i from 24 to 0 ]
+		ta(i) := i;
+            j := c - i;                 [ j from 100 to 124 <- j := 124 - i ]
+		tb(j) := c - j;                 [ c - j = c - (c - i) = i ]
 	ENDFOR
-	[wypisywanie nieposortowanej tablicy]
-	FOR i FROM 1 TO m DO
-		WRITE tab(i);
+	[ ta = (0,1,2,...,23,24) ]
+	[ tb = (24,23,...,2,1,0) ] 
+	
+	d := 999800;
+	FOR i FROM tc(r_) TO tc(_r) DO  [ i from      0 to     24 ]
+        j := 100 + i;               [ j from    100 to    124 <- j :=    100 + i ]
+        k := d + j;                 [ k from 999900 to 999924 <- k := 999800 + j ] 
+		tc(k) := ta(i) * tb(j);
 	ENDFOR
-	WRITE 1234567890;
-	[sortowanie]
-	FOR i FROM 2 TO m DO
-		x := tab(i);
-		j := i;
-		WHILE j > 1 DO
-			k := j - 1;
-			IF tab(k) > x THEN
-				tab(j) := tab(k);
-				j := j - 1;
-			ELSE
-				k := j;
-				j := 0;
-			ENDIF
-		ENDWHILE
-		tab(k) := x;
+	[ tc = (0,23,44,...,143,144,143,...,44,23,0) ]
+
+	FOR i FROM _r TO r_ DO
+		WRITE tc(i);
 	ENDFOR
-	[wypisywanie posortowanej tablicy]
-	FOR i FROM 1 TO m DO
-		WRITE tab(i);
-	ENDFOR
+
 END
+
+

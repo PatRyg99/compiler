@@ -122,8 +122,7 @@ class ForToLoop(IteratorLoop):
         iter_reg = RegisterManager.get_register()
         cond_reg = RegisterManager.get_register()
 
-        cond_code = iterator.generate_code(iter_reg, self.lineno)
-        cond_code += iterator.generate_end_code(cond_reg)
+        cond_code = iterator.generate_both(iter_reg, cond_reg, self.lineno)
 
         cond_code += [
             # Check LEQ
@@ -144,11 +143,8 @@ class ForToLoop(IteratorLoop):
         if not loop_code:
             return []
 
-        # Perform increment
-        inc_reg = RegisterManager.get_register()
-
         # Increment iter and jump
-        inc_code = iterator.increment(inc_reg)
+        inc_code = iterator.increment()
         inc_code += [JUMP(-(len(cond_code) + len(loop_code) + len(inc_code) + 1))]
 
         # Add jump to condition
@@ -156,8 +152,6 @@ class ForToLoop(IteratorLoop):
 
         # Undeclare iterator
         self.undeclare_iter()
-
-        iter_reg.unlock()
 
         return iter_code + cond_code + loop_code + inc_code
 
@@ -174,8 +168,7 @@ class ForDownToLoop(IteratorLoop):
         iter_reg = RegisterManager.get_register()
         cond_reg = RegisterManager.get_register()
 
-        cond_code = iterator.generate_code(iter_reg, self.lineno)
-        cond_code += iterator.generate_end_code(cond_reg)
+        cond_code = iterator.generate_both(iter_reg, cond_reg, self.lineno)
         cond_code += [
             # Check GEQ
             INC(iter_reg),
@@ -195,11 +188,8 @@ class ForDownToLoop(IteratorLoop):
         if not loop_code:
             return []
 
-        # Perform decrement
-        dec_reg = RegisterManager.get_register()
-
         # Decrement iter and jump
-        dec_code = iterator.decrement(dec_reg)
+        dec_code = iterator.decrement()
         dec_code += [JUMP(-(len(cond_code) + len(loop_code) + len(dec_code) + 1))]
 
         # Add jump to condition
@@ -207,7 +197,5 @@ class ForDownToLoop(IteratorLoop):
 
         # Undeclare iterator
         self.undeclare_iter()
-
-        dec_reg.unlock()
 
         return iter_code + cond_code + loop_code + dec_code
