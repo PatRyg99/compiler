@@ -178,21 +178,11 @@ class Iterator:
         self.memory_block = memory_block
         self.initilized = True
 
-    def allocate_start(self, reg: str):
+    def allocate_range(self, reg_start: str, reg_end: str):
         mem = RegisterManager.get_register()
 
         code = Constant(self.memory_block).generate_code(mem)
-        code.append(STORE(reg, mem))
-
-        mem.unlock()
-
-        return code
-
-    def allocate_end(self, reg: str):
-        mem = RegisterManager.get_register()
-
-        code = Constant(self.memory_block + 1).generate_code(mem)
-        code.append(STORE(reg, mem))
+        code += [STORE(reg_start, mem), INC(mem), STORE(reg_end, mem)]
 
         mem.unlock()
 

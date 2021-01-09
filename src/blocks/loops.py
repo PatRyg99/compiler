@@ -78,30 +78,33 @@ class IteratorLoop(Block):
     def declare_iter(self):
         from src.variables import VariableManager
 
-        reg = RegisterManager.get_register()
+        reg_start = RegisterManager.get_register()
+        reg_end = RegisterManager.get_register()
 
         # Compute starting value
         if isinstance(self.start, Constant):
-            start_code = self.start.generate_code(reg)
+            start_code = self.start.generate_code(reg_start)
         else:
-            start_code = self.start.generate_mem(reg, self.lineno)
-            start_code.append(LOAD(reg, reg))
+            start_code = self.start.generate_mem(reg_start, self.lineno)
+            start_code.append(LOAD(reg_start, reg_start))
 
         # Compute ending value
         if isinstance(self.end, Constant):
-            end_code = self.end.generate_code(reg)
+            end_code = self.end.generate_code(reg_end)
         else:
-            end_code = self.end.generate_mem(reg, self.lineno)
-            end_code.append(LOAD(reg, reg))
+            end_code = self.end.generate_mem(reg_end, self.lineno)
+            end_code.append(LOAD(reg_end, reg_end))
 
         # Allocate iterator with constant range
         VariableManager.declare_iterator(self.iter_name)
-        start_code += VariableManager.iterators[self.iter_name].allocate_start(reg)
-        end_code += VariableManager.iterators[self.iter_name].allocate_end(reg)
+        allocate_code = VariableManager.iterators[self.iter_name].allocate_range(
+            reg_start, reg_end
+        )
 
-        reg.unlock()
+        reg_start.unlock()
+        reg_end.unlock()
 
-        return start_code + end_code
+        return start_code + end_code + allocate_code
 
     def undeclare_iter(self):
         from src.variables import VariableManager
