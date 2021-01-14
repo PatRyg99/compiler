@@ -1,20 +1,12 @@
 RESET a
 INC a
-SHL a
-SHL a
-SHL a
-INC a
-SHL a
-INC a
-SHL a
-SHL a
-SHL a
-SHL a
 GET a
 RESET a
 INC a
 RESET b
 INC b
+SHL b
+SHL b
 STORE a b
 RESET a
 INC a
@@ -24,11 +16,11 @@ SHL b
 INC b
 SHL b
 SHL b
-SHL b
 INC b
 SHL b
-INC b
 SHL b
+SHL b
+INC b
 STORE a b
 RESET a
 RESET b
@@ -40,25 +32,15 @@ SHL b
 SHL b
 INC b
 SHL b
-SHL b
 INC b
 SHL b
 INC b
+SHL b
 STORE a b
 RESET a
 INC a
 RESET b
 INC b
-SHL b
-SHL b
-SHL b
-INC b
-SHL b
-INC b
-SHL b
-SHL b
-SHL b
-SHL b
 LOAD b b
 RESET c
 INC c
@@ -96,7 +78,7 @@ INC b
 LOAD b b
 INC b
 SUB b a
-JZERO b 295
+JZERO b 233
 RESET a
 INC a
 SHL a
@@ -118,30 +100,10 @@ SUB a b
 RESET b
 INC b
 SHL b
-SHL b
-SHL b
-INC b
-SHL b
-INC b
-SHL b
-SHL b
-SHL b
-SHL b
-INC b
 STORE a b
 RESET a
 INC a
 SHL a
-SHL a
-SHL a
-INC a
-SHL a
-INC a
-SHL a
-SHL a
-SHL a
-SHL a
-INC a
 LOAD a a
 RESET b
 INC b
@@ -149,16 +111,7 @@ SUB a b
 RESET b
 INC b
 SHL b
-SHL b
-SHL b
 INC b
-SHL b
-INC b
-SHL b
-SHL b
-SHL b
-INC b
-SHL b
 STORE a b
 RESET a
 INC a
@@ -169,23 +122,13 @@ SHL a
 SHL a
 INC a
 SHL a
-SHL a
 INC a
 SHL a
 INC a
+SHL a
 RESET b
 INC b
 SHL b
-SHL b
-SHL b
-INC b
-SHL b
-INC b
-SHL b
-SHL b
-SHL b
-SHL b
-INC b
 LOAD b b
 ADD a b
 LOAD a a
@@ -201,10 +144,10 @@ SHL b
 SHL b
 INC b
 SHL b
-SHL b
 INC b
 SHL b
 INC b
+SHL b
 RESET c
 INC c
 SHL c
@@ -224,43 +167,30 @@ ADD b c
 STORE a b
 RESET a
 INC a
+SHL a
+SHL a
 RESET b
 INC b
 SHL b
-SHL b
-SHL b
-INC b
-SHL b
-INC b
-SHL b
-SHL b
-SHL b
-SHL b
-INC b
 LOAD b b
 ADD a b
 LOAD a a
 RESET b
 INC b
+SHL b
+SHL b
 RESET c
 INC c
 SHL c
-SHL c
-SHL c
 INC c
-SHL c
-INC c
-SHL c
-SHL c
-SHL c
-INC c
-SHL c
 LOAD c c
 ADD b c
 LOAD b b
 ADD a b
 RESET b
 INC b
+SHL b
+SHL b
 RESET c
 INC c
 SHL c
@@ -284,24 +214,14 @@ SHL a
 INC a
 SHL a
 SHL a
-SHL a
 INC a
 SHL a
-INC a
 SHL a
+SHL a
+INC a
 RESET b
 INC b
 SHL b
-SHL b
-SHL b
-INC b
-SHL b
-INC b
-SHL b
-SHL b
-SHL b
-SHL b
-INC b
 LOAD b b
 ADD a b
 LOAD a a
@@ -314,10 +234,10 @@ SHL b
 SHL b
 INC b
 SHL b
-SHL b
 INC b
 SHL b
 INC b
+SHL b
 RESET c
 INC c
 SHL c
@@ -351,11 +271,11 @@ SHL b
 INC b
 SHL b
 SHL b
-SHL b
 INC b
 SHL b
-INC b
 SHL b
+SHL b
+INC b
 RESET c
 INC c
 SHL c
@@ -390,47 +310,29 @@ INC a
 LOAD b a
 INC b
 STORE b a
-JUMP -313
+JUMP -251
 RESET a
 INC a
 SHL a
 INC a
 SHL a
 SHL a
-SHL a
 INC a
 SHL a
-INC a
 SHL a
+SHL a
+INC a
 RESET c
 INC c
-SHL c
-SHL c
-SHL c
-INC c
-SHL c
-INC c
-SHL c
-SHL c
-SHL c
-SHL c
 LOAD c c
 ADD a c
 PUT a
 RESET a
 INC a
+SHL a
+SHL a
 RESET c
 INC c
-SHL c
-SHL c
-SHL c
-INC c
-SHL c
-INC c
-SHL c
-SHL c
-SHL c
-SHL c
 LOAD c c
 ADD a c
 PUT a

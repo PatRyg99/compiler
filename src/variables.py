@@ -13,6 +13,19 @@ class VariableManager:
     next_memory_block = 1
 
     @staticmethod
+    def allocate():
+
+        # Allocate variables
+        for var in VariableManager.variables.values():
+            var.memory_block = VariableManager.next_memory_block
+            VariableManager.next_memory_block += 1
+
+        # Allocate arrays
+        for arr in VariableManager.arrays.values():
+            arr.memory_block = VariableManager.next_memory_block
+            VariableManager.next_memory_block += arr.range[1] - arr.range[0] + 1
+
+    @staticmethod
     def _check_redeclaration(name: str, lineno: int):
         """Check if variable hasn't been declared yet"""
         declared = list(VariableManager.variables.keys()) + list(
@@ -36,22 +49,14 @@ class VariableManager:
     def declare_variable(name: str, lineno: int):
         """Variable declaration with name check"""
         VariableManager._check_redeclaration(name, lineno)
-
-        VariableManager.variables[name] = Variable(
-            name, VariableManager.next_memory_block
-        )
-        VariableManager.next_memory_block += 1
+        VariableManager.variables[name] = Variable(name)
 
     @staticmethod
     def declare_array(name: str, range: tuple, lineno: int):
         """Array declaration with name and range check"""
         VariableManager._check_redeclaration(name, lineno)
-        length = VariableManager._compute_length(name, range, lineno)
-
-        VariableManager.arrays[name] = Array(
-            name, VariableManager.next_memory_block, range
-        )
-        VariableManager.next_memory_block += length
+        VariableManager._compute_length(name, range, lineno)
+        VariableManager.arrays[name] = Array(name, range)
 
     @staticmethod
     def declare_iterator(name: str):
@@ -90,9 +95,9 @@ class VariableManager:
 
 
 class Variable:
-    def __init__(self, name: str, memory_block: int):
+    def __init__(self, name: str):
         self.name = name
-        self.memory_block = memory_block
+        self.memory_block = None
         self.initilized = False
 
     def generate_mem(self, reg: str, lineno: int):
@@ -109,14 +114,17 @@ class Variable:
 
 
 class ArrayElement:
-    def __init__(self, name: str, memory_block: int, range: tuple, idx):
+    def __init__(self, name: str, range: tuple, idx):
         self.name = name
-        self.memory_block = memory_block
         self.range = range
         self.idx = idx
         self.initilized = True
+        self.memory_block = None
 
     def generate_mem(self, reg: str, lineno: int):
+
+        # Get memory block from parent array
+        self.memory_block = VariableManager.arrays[self.name].memory_block
 
         # If index is a number - perform variable load
         if isinstance(self.idx, int):
@@ -145,13 +153,13 @@ class ArrayElement:
 
 
 class Array:
-    def __init__(self, name: str, memory_block: int, range: tuple):
+    def __init__(self, name: str, range: tuple):
         self.name = name
-        self.memory_block = memory_block
         self.range = range
+        self.memory_block = None
 
     def get(self, idx: int, lineno: int):
-        return ArrayElement(self.name, self.memory_block, self.range, idx)
+        return ArrayElement(self.name, self.range, idx)
 
 
 class UndeclaredIterator:

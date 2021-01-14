@@ -11,12 +11,18 @@ def main(in_file: str, out_file: str):
     with open(in_file, "r") as f:
         data = f.read()
 
+    # Defining lexer and parser
     lexer = CompilerLexer()
     parser = CompilerParser()
 
+    # Running lexer and parser
     tokens = lexer.tokenize(data)
     program = parser.parse(tokens)
 
+    # Allocating variables
+    VariableManager.allocate()
+
+    # Performing static analysis
     program = StaticAnalyser().run(program)
 
     if program is not None:
