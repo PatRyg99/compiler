@@ -11,9 +11,12 @@ class VariableManager:
     arrays = {}
     iterators = {}
     next_memory_block = 1
+    iter_offset = 1
 
     @staticmethod
     def allocate():
+
+        VariableManager.next_memory_block = VariableManager.iter_offset
 
         # Allocate variables
         for var in VariableManager.variables.values():
@@ -59,12 +62,10 @@ class VariableManager:
         VariableManager.arrays[name] = Array(name, range)
 
     @staticmethod
-    def declare_iterator(name: str):
+    def declare_iterator(name: str, iter_mem: int):
         """Iterator declaration"""
-        VariableManager.iterators[name] = Iterator(
-            name, VariableManager.next_memory_block
-        )
-        VariableManager.next_memory_block += 2
+        VariableManager.iterators[name] = Iterator(name, iter_mem)
+        # VariableManager.next_memory_block += 2
 
     @staticmethod
     def get_var(name: str, lineno: int):

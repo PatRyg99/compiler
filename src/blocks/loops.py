@@ -75,6 +75,20 @@ class IteratorLoop(Block):
         self.commands = commands
         self.lineno = lineno
 
+    def set_iter_mem(self):
+        from src.variables import VariableManager
+
+        self.iter_mem = VariableManager.next_memory_block
+        VariableManager.next_memory_block += 2
+        VariableManager.iter_offset = max(
+            VariableManager.iter_offset, VariableManager.next_memory_block
+        )
+
+    def unset_iter_mem(self):
+        from src.variables import VariableManager
+
+        VariableManager.next_memory_block -= 2
+
     def declare_iter(self):
         from src.variables import VariableManager
 
@@ -96,7 +110,7 @@ class IteratorLoop(Block):
             end_code.append(LOAD(reg_end, reg_end))
 
         # Allocate iterator with constant range
-        VariableManager.declare_iterator(self.iter_name)
+        VariableManager.declare_iterator(self.iter_name, self.iter_mem)
         allocate_code = VariableManager.iterators[self.iter_name].allocate_range(
             reg_start, reg_end
         )
@@ -110,7 +124,7 @@ class IteratorLoop(Block):
         from src.variables import VariableManager
 
         del VariableManager.iterators[self.iter_name]
-        VariableManager.next_memory_block -= 2
+        # VariableManager.next_memory_block -= 2
 
 
 class ForToLoop(IteratorLoop):

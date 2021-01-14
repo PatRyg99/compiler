@@ -19,11 +19,11 @@ def main(in_file: str, out_file: str):
     tokens = lexer.tokenize(data)
     program = parser.parse(tokens)
 
-    # Allocating variables
-    VariableManager.allocate()
-
     # Performing static analysis
     program = StaticAnalyser().run(program)
+
+    # Allocating variables
+    VariableManager.allocate()
 
     if program is not None:
         code = program.generate_code()

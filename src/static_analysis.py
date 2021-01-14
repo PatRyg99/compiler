@@ -52,7 +52,12 @@ class StaticAnalyser:
 
             # Iterator loop block
             elif self.is_iter_loop(block):
+
+                # Set memory space for iterator - nested loops
+                block.set_iter_mem()
                 self.scan_variables(block.commands)
+                block.unset_iter_mem()
+
                 self.add_variable(block.start)
                 self.add_variable(block.end)
 
