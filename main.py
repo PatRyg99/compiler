@@ -4,6 +4,7 @@ from src.parser import CompilerParser
 from src.variables import VariableManager
 from src.program import Program
 from src.static_analysis import StaticAnalyser
+from src.registers import RegisterManager
 
 
 def main(in_file: str, out_file: str):

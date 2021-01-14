@@ -1,5 +1,5 @@
 from src.blocks import Block
-from src.instructions import JZERO, JUMP, RESET, ADD, LOAD, INC, DEC, SUB
+from src.instructions import JZERO, JUMP, RESET, ADD, LOAD, INC, DEC, SUB, STORE
 from src.blocks import Constant
 from src.blocks.conditions import LEQ, GEQ
 from src.registers import RegisterManager
@@ -13,6 +13,8 @@ class ConditionLoop(Block):
         self.commands = commands
         self.lineno = lineno
 
+        self.used_regs = 0
+
 
 class WhileLoop(ConditionLoop):
     def generate_code(self):
@@ -20,6 +22,9 @@ class WhileLoop(ConditionLoop):
         # Generating condition evaluation to register regc
         regc = RegisterManager.get_register()
         cond_code = self.condition.generate_code(regc)
+
+        self.used_regs = 1 + RegisterManager.max_locked
+        RegisterManager.reset_max()
         regc.unlock()
 
         # Generating code for loop
@@ -27,6 +32,7 @@ class WhileLoop(ConditionLoop):
         for command in self.commands:
             if command.generate:
                 loop_code += command.generate_code()
+                self.used_regs = max(self.used_regs, command.used_regs)
 
         # If no loop code inside - omit loop generation
         if not loop_code:
@@ -47,6 +53,9 @@ class RepeatUntilLoop(ConditionLoop):
         # Generating condition evaluation to register regc
         regc = RegisterManager.get_register()
         cond_code = self.condition.generate_code(regc)
+
+        self.used_regs = 1 + RegisterManager.max_locked
+        RegisterManager.reset_max()
         regc.unlock()
 
         # Generating code for loop
@@ -54,6 +63,7 @@ class RepeatUntilLoop(ConditionLoop):
         for command in self.commands:
             if command.generate:
                 loop_code += command.generate_code()
+                self.used_regs = max(self.used_regs, command.used_regs)
 
         # If no loop code inside - omit loop generation
         if not loop_code:
@@ -74,6 +84,8 @@ class IteratorLoop(Block):
         self.end = end
         self.commands = commands
         self.lineno = lineno
+
+        self.used_regs = 0
 
     def declare_iter(self):
         from src.variables import VariableManager
@@ -104,7 +116,19 @@ class IteratorLoop(Block):
         reg_start.unlock()
         reg_end.unlock()
 
+        self.used_regs = 2 + RegisterManager.max_locked
+        RegisterManager.reset_max()
+
         return start_code + end_code + allocate_code
+
+    def generate_loop_code(self):
+        loop_code = []
+        for command in self.commands:
+            if command.generate:
+                loop_code += command.generate_code()
+                self.used_regs = max(self.used_regs, command.used_regs)
+
+        return loop_code
 
     def undeclare_iter(self):
         from src.variables import VariableManager
@@ -121,33 +145,67 @@ class ForToLoop(IteratorLoop):
         iter_code = self.declare_iter()
         iterator = VariableManager.iterators[self.iter_name]
 
-        # Check iter condition
-        iter_reg = RegisterManager.get_register()
-        cond_reg = RegisterManager.get_register()
-
-        cond_code = iterator.generate_both(iter_reg, cond_reg, self.lineno)
-
-        cond_code += [
-            # Check LEQ
-            INC(cond_reg),
-            SUB(cond_reg, iter_reg),
-        ]
-
-        iter_reg.unlock()
-        cond_reg.unlock()
-
-        # Generating code for loop
-        loop_code = []
-        for command in self.commands:
-            if command.generate:
-                loop_code += command.generate_code()
+        # Generate loop code
+        loop_code = self.generate_loop_code()
 
         # If no loop code inside - omit loop generation
         if not loop_code:
             return []
 
-        # Increment iter and jump
-        inc_code = iterator.increment()
+        # If there is an empty register - use it as iterator
+        if self.used_regs < 6:
+
+            # Get register for iterator
+            mem_reg = RegisterManager.get_register_by_id(self.used_regs)
+            self.used_regs += 1
+
+            # Generate iter memory to it
+            iter_code += iterator.generate_mem(mem_reg, self.lineno)
+
+            # Check iter condition
+            iter_reg = RegisterManager.get_register()
+            cond_reg = RegisterManager.get_register()
+
+            cond_code = [
+                LOAD(iter_reg, mem_reg),
+                INC(mem_reg),
+                LOAD(cond_reg, mem_reg),
+                DEC(mem_reg),
+            ]
+
+            cond_code += [
+                # Check LEQ
+                INC(cond_reg),
+                SUB(cond_reg, iter_reg),
+            ]
+
+            iter_reg.unlock()
+            cond_reg.unlock()
+
+            # Increment iter
+            inc_code = iterator.increment(mem_reg)
+
+        # Otherwise load iterator from memory
+        else:
+            # Check iter condition
+            iter_reg = RegisterManager.get_register()
+            cond_reg = RegisterManager.get_register()
+
+            cond_code = iterator.generate_both(iter_reg, cond_reg, self.lineno)
+
+            cond_code += [
+                # Check LEQ
+                INC(cond_reg),
+                SUB(cond_reg, iter_reg),
+            ]
+
+            iter_reg.unlock()
+            cond_reg.unlock()
+
+            # Increment iter
+            inc_code = iterator.increment()
+
+        # Jump after inc
         inc_code += [JUMP(-(len(cond_code) + len(loop_code) + len(inc_code) + 1))]
 
         # Add jump to condition
@@ -163,36 +221,70 @@ class ForDownToLoop(IteratorLoop):
     def generate_code(self):
         from src.variables import VariableManager
 
-        # Code for interator declarion
+        # Code for iterator declaration
         iter_code = self.declare_iter()
         iterator = VariableManager.iterators[self.iter_name]
 
-        # Check iter condition
-        iter_reg = RegisterManager.get_register()
-        cond_reg = RegisterManager.get_register()
-
-        cond_code = iterator.generate_both(iter_reg, cond_reg, self.lineno)
-        cond_code += [
-            # Check GEQ
-            INC(iter_reg),
-            SUB(iter_reg, cond_reg),
-        ]
-
-        iter_reg.unlock()
-        cond_reg.unlock()
-
-        # Generating code for loop
-        loop_code = []
-        for command in self.commands:
-            if command.generate:
-                loop_code += command.generate_code()
+        # Generate loop code
+        loop_code = self.generate_loop_code()
 
         # If no loop code inside - omit loop generation
         if not loop_code:
             return []
 
-        # Decrement iter and jump
-        dec_code = iterator.decrement()
+        # If there is a one empty register - use it as iterator
+        if self.used_regs < 6:
+
+            # Get register for iterator
+            mem_reg = RegisterManager.get_register_by_id(self.used_regs)
+            self.used_regs += 1
+
+            # Generate iter memory to it
+            iter_code += iterator.generate_mem(mem_reg, self.lineno)
+
+            # Check iter condition
+            iter_reg = RegisterManager.get_register()
+            cond_reg = RegisterManager.get_register()
+
+            cond_code = [
+                LOAD(iter_reg, mem_reg),
+                INC(mem_reg),
+                LOAD(cond_reg, mem_reg),
+                DEC(mem_reg),
+            ]
+
+            cond_code += [
+                # Check GEQ
+                INC(iter_reg),
+                SUB(iter_reg, cond_reg),
+            ]
+
+            iter_reg.unlock()
+            cond_reg.unlock()
+
+            # Decrement iter
+            dec_code = iterator.decrement(mem_reg)
+
+        # Otherwise load iterator from memory
+        else:
+            # Check iter condition
+            iter_reg = RegisterManager.get_register()
+            cond_reg = RegisterManager.get_register()
+
+            cond_code = iterator.generate_both(iter_reg, cond_reg, self.lineno)
+            cond_code += [
+                # Check GEQ
+                INC(iter_reg),
+                SUB(iter_reg, cond_reg),
+            ]
+
+            iter_reg.unlock()
+            cond_reg.unlock()
+
+            # Decrement iter
+            dec_code = iterator.decrement()
+
+        # Jump after dec
         dec_code += [JUMP(-(len(cond_code) + len(loop_code) + len(dec_code) + 1))]
 
         # Add jump to condition
