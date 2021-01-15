@@ -86,8 +86,22 @@ class Multiply(BinaryOperation):
 
     def eval_mem(self, regx, regy):
         out = RegisterManager.get_register()
+        comp = RegisterManager.get_register()
 
-        code = [
+        switched_code = [
+            RESET(out),
+            JZERO(regy, 7),
+            JODD(regy, 2),
+            JUMP(2),
+            ADD(out, regx),
+            SHR(regy),
+            SHL(regx),
+            JUMP(-6),
+            RESET(regx),
+            ADD(regx, out),
+        ]
+
+        main_code = [
             RESET(out),
             JZERO(regx, 7),
             JODD(regx, 2),
@@ -98,11 +112,21 @@ class Multiply(BinaryOperation):
             JUMP(-6),
             RESET(regx),
             ADD(regx, out),
+            JUMP(len(switched_code) + 1),
+        ]
+
+        comp_code = [
+            RESET(comp),
+            ADD(comp, regy),
+            # Perform substraction and check if no 0
+            SUB(comp, regx),
+            JZERO(comp, len(main_code) + 1),
         ]
 
         out.unlock()
+        comp.unlock()
 
-        return code
+        return comp_code + main_code + switched_code
 
 
 class Divide(BinaryOperation):
