@@ -100,8 +100,6 @@ class Variable:
         self.memory_block = None
         self.initilized = False
 
-        self.used_regs = 0
-
     def generate_mem(self, reg: str, lineno: int):
         if self.initilized:
             return Constant(self.memory_block).generate_code(reg)
@@ -123,8 +121,6 @@ class ArrayElement:
         self.initilized = True
         self.memory_block = None
 
-        self.used_regs = 0
-
     def generate_mem(self, reg: str, lineno: int):
 
         # Get memory block from parent array
@@ -138,11 +134,9 @@ class ArrayElement:
         # Otherwise index is a variable
         else:
             regv = RegisterManager.get_register()
-            self.used_regs = 1
 
             code = Constant(self.memory_block - self.range[0]).generate_code(reg)
             code += self.idx.generate_code(regv, lineno)
-            self.used_regs += self.idx.used_regs
 
             code += [ADD(reg, regv)]
 
@@ -164,8 +158,6 @@ class Array:
         self.range = range
         self.memory_block = None
 
-        self.used_regs = 0
-
     def get(self, idx: int, lineno: int):
         return ArrayElement(self.name, self.range, idx)
 
@@ -174,8 +166,6 @@ class UndeclaredIterator:
     def __init__(self, name: str, lineno: int):
         self.name = name
         self.lineno = lineno
-
-        self.used_regs = 0
 
     def declare(self):
         if self.name in VariableManager.iterators.keys():
@@ -196,11 +186,8 @@ class Iterator:
         self.memory_block = memory_block
         self.initilized = True
 
-        self.used_regs = 0
-
     def allocate_range(self, reg_start: str, reg_end: str):
         mem = RegisterManager.get_register()
-        self.used_regs = 1
 
         code = Constant(self.memory_block).generate_code(mem)
         code += [STORE(reg_start, mem), INC(mem), STORE(reg_end, mem)]
@@ -209,41 +196,27 @@ class Iterator:
 
         return code
 
-    def increment(self, mem_reg: str = None):
+    def increment(self):
+        inc_reg = RegisterManager.get_register()
         regc = RegisterManager.get_register()
-        self.used_regs = 1
 
-        code = []
+        code = Constant(self.memory_block).generate_code(inc_reg)
+        code += [LOAD(regc, inc_reg), INC(regc), STORE(regc, inc_reg)]
 
-        if not mem_reg:
-            mem_reg = RegisterManager.get_register()
-            self.used_regs += 1
-
-            code = Constant(self.memory_block).generate_code(mem_reg)
-            mem_reg.unlock()
-
-        code += [LOAD(regc, mem_reg), INC(regc), STORE(regc, mem_reg)]
         regc.unlock()
+        inc_reg.unlock()
 
         return code
 
-    def decrement(self, mem_reg: str = None):
+    def decrement(self):
+        dec_reg = RegisterManager.get_register()
         regc = RegisterManager.get_register()
-        self.used_regs = 1
 
-        code = []
-
-        if not mem_reg:
-            mem_reg = RegisterManager.get_register()
-
-            self.used_regs += 1
-            code = Constant(self.memory_block).generate_code(mem_reg)
-
-            mem_reg.unlock()
-
-        code += [LOAD(regc, mem_reg), JZERO(regc, 4), DEC(regc), STORE(regc, mem_reg)]
+        code = Constant(self.memory_block).generate_code(dec_reg)
+        code += [LOAD(regc, dec_reg), JZERO(regc, 4), DEC(regc), STORE(regc, dec_reg)]
 
         regc.unlock()
+        dec_reg.unlock()
 
         return code
 

@@ -11,16 +11,11 @@ class IfCondition(Block):
         self.commands = commands
         self.lineno = lineno
 
-        self.used_regs = 0
-
     def generate_code(self):
 
         # Generating condition evaluation to register regc
         regc = RegisterManager.get_register()
         cond_code = self.condition.generate_code(regc)
-
-        self.used_regs = 1 + RegisterManager.max_locked
-        RegisterManager.reset_max()
         regc.unlock()
 
         # Generating code for if condition
@@ -28,7 +23,6 @@ class IfCondition(Block):
         for command in self.commands:
             if command.generate:
                 if_code += command.generate_code()
-                self.used_regs = max(self.used_regs, command.used_regs)
 
         # If no if code inside - omit if generation
         if not if_code:
@@ -49,14 +43,9 @@ class IfElseCondition(Block):
         self.else_commands = else_commands
         self.lineno = lineno
 
-        self.used_regs = 0
-
     def generate_code(self):
         regc = RegisterManager.get_register()
         cond_code = self.condition.generate_code(regc)
-
-        self.used_regs = 1 + RegisterManager.max_locked
-        RegisterManager.reset_max()
         regc.unlock()
 
         # Generating code for if condition
@@ -64,14 +53,12 @@ class IfElseCondition(Block):
         for command in self.if_commands:
             if command.generate:
                 if_code += command.generate_code()
-                self.used_regs = max(self.used_regs, command.used_regs)
 
         # Generating code for else condition
         else_code = []
         for command in self.else_commands:
             if command.generate:
                 else_code += command.generate_code()
-                self.used_regs = max(self.used_regs, command.used_regs)
 
         # If no if and else code inside - omit ifelse generation
         if not if_code and not else_code:

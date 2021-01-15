@@ -13,8 +13,6 @@ class Assignment(Block):
         self.expression = expression
         self.lineno = lineno
 
-        self.regs_used = None
-
     def generate_code(self):
         from src.variables import UndeclaredIterator
 
@@ -40,9 +38,5 @@ class Assignment(Block):
         # Unlock registers
         expr_reg.unlock()
         var_reg.unlock()
-
-        # Get number of used registers
-        self.used_regs = RegisterManager.max_locked
-        RegisterManager.reset_max()
 
         return code

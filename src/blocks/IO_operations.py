@@ -11,8 +11,6 @@ class Write(Block):
         self.x = x
         self.lineno = lineno
 
-        self.used_regs = 0
-
     def generate_code(self):
         mem = RegisterManager.get_register()
         const = RegisterManager.get_register()
@@ -32,10 +30,6 @@ class Write(Block):
         mem.unlock()
         const.unlock()
 
-        # Get number of used registers
-        self.used_regs = RegisterManager.max_locked
-        RegisterManager.reset_max()
-
         return code
 
 
@@ -46,8 +40,6 @@ class Read(Block):
         self.x = x
         self.lineno = lineno
 
-        self.used_regs = 0
-
     def generate_code(self):
         self.x.initilized = True
 
@@ -56,9 +48,5 @@ class Read(Block):
         code.append(GET(mem))
 
         mem.unlock()
-
-        # Get number of used registers
-        self.used_regs = RegisterManager.max_locked
-        RegisterManager.reset_max()
 
         return code
