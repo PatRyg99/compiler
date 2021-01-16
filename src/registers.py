@@ -1,18 +1,6 @@
-from enum import Enum
-
-
-class RegisterPriority(Enum):
-    EMPTY = 0
-    CONSTANT = 1
-    VARIABLE = 2
-    ITERATOR = 3
-
-
 class Register:
     def __init__(self, name: str):
         self.name = name
-
-        self.priority = RegisterPriority.EMPTY
         self.value = None
 
         self.lock = False

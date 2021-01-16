@@ -8,7 +8,7 @@
             "name": "Compiler (test)",
             "type": "python",
             "request": "launch",
-            "program": "main.py",
+            "program": "compiler.py",
             "justMyCode": false,
             "args": [
                 "test.txt",
