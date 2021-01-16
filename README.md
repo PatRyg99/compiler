@@ -1,3 +1,8 @@
 ## Python compiler
 
-Project for course "Języki fornalne i teoria translacji" on Wrocław's University of Technology.
+Biblioteki:
+* Python 3
+* sly 0.4
+
+Uruchamianie:
+`python3 compiler.py in_file out_file`
